@@ -3,14 +3,14 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
              version="3.1">
 
-    <persistence-unit name="derby-client-movies-ms">
+    <persistence-unit name="derby-client-shows-ms">
         <properties>
             <!-- Client Driver -->
             <property name="jakarta.persistence.jdbc.driver"
                       value="org.apache.derby.jdbc.ClientDriver"/>
 
             <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:derby://localhost:1527/movies;create=true"/>
+                      value="jdbc:derby://localhost:1527/shows;create=true"/>
 
             <property name="jakarta.persistence.jdbc.user" value="app"/>
             <property name="jakarta.persistence.jdbc.password" value="app"/>
@@ -28,13 +28,13 @@
         </properties>
     </persistence-unit>
 
-    <persistence-unit name="derby-inmemory-movies-ms">
+    <persistence-unit name="derby-inmemory-shows-ms">
         <properties>
             <property name="javax.persistence.jdbc.driver"
                       value="org.apache.derby.jdbc.EmbeddedDriver"/>
 
             <property name="javax.persistence.jdbc.url"
-                      value="jdbc:derby:memory:movies;create=true"/>
+                      value="jdbc:derby:memory:shows;create=true"/>
 
             <property name="jakarta.persistence.jdbc.user" value="app"/>
             <property name="jakarta.persistence.jdbc.password"

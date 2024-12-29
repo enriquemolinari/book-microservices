@@ -12,6 +12,8 @@ import java.util.function.Function;
 @RestController
 public class MoviesController {
 
+    public static final String AUTHENTICATION_REQUIRED = "You must be logged in to perform this action...";
+
     private final MoviesSubSystem moviesSubSystem;
 
     public MoviesController(MoviesSubSystem moviesSubSystem) {

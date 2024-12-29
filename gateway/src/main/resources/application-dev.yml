@@ -1,0 +1,16 @@
+server:
+  ms:
+    host: http://localhost
+  port: 8080
+port:
+  movies: 8091
+  shows: 8092
+  users: 8093
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: movies_public
+          uri: ${server.ms.host}:${port.movies}
+          predicates:
+            - Path=/movies/**

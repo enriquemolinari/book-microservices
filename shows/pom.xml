@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>coding.architecture.style</groupId>
-    <artifactId>movies</artifactId>
+    <artifactId>shows</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -111,7 +111,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <pluginManagement>
             <plugins>

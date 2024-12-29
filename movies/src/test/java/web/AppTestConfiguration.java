@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("default")
-public class AppConfiguration {
+@Profile("test")
+public class AppTestConfiguration {
     @Bean
     public MoviesSubSystem createMovies() {
         var emf = Persistence

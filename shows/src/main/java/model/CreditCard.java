@@ -2,6 +2,7 @@ package model;
 
 import java.time.YearMonth;
 
+@SuppressWarnings("EmptyMethod")
 public class CreditCard {
     private final String number;
     private final YearMonth expirationDate;

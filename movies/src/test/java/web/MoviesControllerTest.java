@@ -2,6 +2,7 @@ package web;
 
 import api.MoviesSubSystem;
 import io.restassured.response.Response;
+import main.Main;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = Main.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 // Note: This test starts with a sample database and retains it until all tests are completed.
 // This approach may introduce issues since the database is shared across all tests.
 // see AppTestConfiguration
@@ -48,7 +49,7 @@ public class MoviesControllerTest {
     private static final String URL = "http://localhost:8080";
     @Autowired
     private MoviesSubSystem moviesSubSystem;
-    
+
     //@Test
     public void aPublishedRegisteredUserItIsAllowedToRankAMovie() {
         //TODO: como voy a testear esto? Generando un token a manopla?

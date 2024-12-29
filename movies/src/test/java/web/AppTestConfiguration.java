@@ -2,6 +2,7 @@ package web;
 
 import api.MoviesSubSystem;
 import jakarta.persistence.Persistence;
+import main.SetUpSampleDb;
 import model.Movies;
 import model.PersistenceUnit;
 import org.springframework.context.annotation.Bean;

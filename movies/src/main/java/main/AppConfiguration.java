@@ -1,4 +1,4 @@
-package web;
+package main;
 
 import api.MoviesSubSystem;
 import jakarta.persistence.Persistence;

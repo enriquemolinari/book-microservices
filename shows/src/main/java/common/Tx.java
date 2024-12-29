@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class Tx {
 
-    private EntityManagerFactory emf;
+    private final EntityManagerFactory emf;
 
     public Tx(EntityManagerFactory emf) {
         this.emf = emf;

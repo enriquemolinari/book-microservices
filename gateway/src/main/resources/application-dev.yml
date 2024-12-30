@@ -18,3 +18,7 @@ spring:
           uri: ${server.ms.host}:${port.shows}
           predicates:
             - Path=/shows/**
+        - id: users_public
+          uri: ${server.ms.host}:${port.users}
+          predicates:
+            - Path=/users/**

@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // This approach may introduce issues since the database is shared across all tests.
 // see AppTestConfiguration
 @ActiveProfiles(value = "test")
-public class CinemaSystemControllerTest {
+public class ShowsControllerTest {
 
     private static final String INFO_KEY = "info";
     private static final String SEAT_AVAILABLE_KEY = "available";
@@ -47,7 +47,8 @@ public class CinemaSystemControllerTest {
     private static final String ERROR_MESSAGE_KEY = "message";
     private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
-    private static final String URL = "http://localhost:8080";
+    //TODO: remove hardcoded port
+    private static final String URL = "http://localhost:8081";
     @Autowired
     private ShowsSubSystem showsSubSystem;
 

@@ -41,12 +41,11 @@ public class MoviesControllerTest {
     private static final String RUNNING_FAR_AWAY_MOVIE_NAME = "Running far Away";
     private static final String SMALL_FISH_MOVIE_NAME = "Small Fish";
     private static final String CRASH_TEA_MOVIE_NAME = "Crash Tea";
-    private static final String PASSWORD_JOSE = "123456789012";
-    private static final String USERNAME_JOSE = "jsimini";
     private static final String ERROR_MESSAGE_KEY = "message";
     private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
-    private static final String URL = "http://localhost:8080";
+    //TODO: remove hardcoded port
+    private static final String URL = "http://localhost:8081";
     @Autowired
     private MoviesSubSystem moviesSubSystem;
 

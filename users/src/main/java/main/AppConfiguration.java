@@ -1,10 +1,10 @@
 package main;
 
-import api.ShowsSubSystem;
+import api.UsersSubSystem;
 import jakarta.persistence.Persistence;
-import model.CreditCardPaymentProvider;
+import model.PasetoToken;
 import model.PersistenceUnit;
-import model.Shows;
+import model.Users;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -12,17 +12,14 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("default")
 public class AppConfiguration {
+    //TODO: move this outside repo
+    private static final String SECRET = "nXXh3Xjr2T0ofFilg3kw8BwDEyHmS6OIe4cjWUm2Sm0=";
+
     @Bean
-    public ShowsSubSystem createShows() {
+    public UsersSubSystem createUsers() {
         var emf = Persistence
-                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS);
+                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_USERS_MS);
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
-        return new Shows(emf, doNothingPaymentProvider());
+        return new Users(emf, new PasetoToken(SECRET));
     }
-
-    private CreditCardPaymentProvider doNothingPaymentProvider() {
-        return (creditCardNumber, expire, securityCode, totalAmount) -> {
-        };
-    }
-
 }

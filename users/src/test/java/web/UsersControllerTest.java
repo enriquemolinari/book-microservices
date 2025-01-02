@@ -6,6 +6,7 @@ import main.Main;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,9 +40,14 @@ public class UsersControllerTest {
     private static final String ERROR_MESSAGE_KEY = "message";
     private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
-    //TODO: remove hardcoded and port
-    private static final String URL = "http://localhost:8081";
+    private static final String HOST = "http://localhost";
+    @Value("${server.port}")
+    private String SERVER_PORT;
     private UsersSubSystem usersSubSystem;
+
+    private String urlForTests() {
+        return HOST.concat(":").concat(SERVER_PORT);
+    }
 
     @Test
     public void loginOk() {
@@ -60,7 +66,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .cookie(TOKEN_COOKIE_NAME, token)
-                .post(URL + "/users/logout");
+                .post(urlForTests() + "/users/logout");
 
         var cookie = response.getDetailedCookie(TOKEN_COOKIE_NAME);
         assertEquals(0, cookie.getMaxAge());
@@ -89,7 +95,7 @@ public class UsersControllerTest {
         }
         return given().contentType(JSON_CONTENT_TYPE)
                 .body(loginRequestBody.toString())
-                .post(URL + LOGIN_URI);
+                .post(urlForTests() + LOGIN_URI);
     }
 
     @Test
@@ -100,7 +106,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(loginRequestBody.toString())
-                .post(URL + LOGIN_URI);
+                .post(urlForTests() + LOGIN_URI);
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is("Invalid username or password"));
@@ -119,7 +125,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(registerRequestBody.toString())
-                .post(URL + "/users/register");
+                .post(urlForTests() + "/users/register");
 
         response.then().statusCode(200);
 
@@ -144,7 +150,7 @@ public class UsersControllerTest {
 
     @Test
     public void retrieveUserProfileFailIfNotAuthenticated() {
-        var response = get(URL + "/users/profile");
+        var response = get(urlForTests() + "/users/profile");
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
@@ -159,7 +165,7 @@ public class UsersControllerTest {
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .cookie(TOKEN_COOKIE_NAME, token)
                 .body(changePassRequestBody.toString())
-                .post(URL + "/users/changepassword");
+                .post(urlForTests() + "/users/changepassword");
         assertEquals(500, response.statusCode());
         response.then().body(ERROR_MESSAGE_KEY,
                 is("Passwords must be equals"));
@@ -171,7 +177,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(changePassRequestBody.toString())
-                .post(URL + "/users/changepassword");
+                .post(urlForTests() + "/users/changepassword");
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
@@ -186,7 +192,7 @@ public class UsersControllerTest {
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .cookie(TOKEN_COOKIE_NAME, token)
                 .body(changePassRequestBody.toString())
-                .post(URL + "/users/changepassword");
+                .post(urlForTests() + "/users/changepassword");
 
         assertEquals(200, response.statusCode());
     }
@@ -209,7 +215,7 @@ public class UsersControllerTest {
 
         var response = given()
                 .cookie(TOKEN_COOKIE_NAME, token)
-                .get(URL + "/users/profile");
+                .get(urlForTests() + "/users/profile");
 
         response.then().body(USERNAME_KEY, is(USERNAME_JOSE))
                 .body(FULLNAME_KEY, is(JOSE_FULLNAME))

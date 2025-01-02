@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -47,11 +48,15 @@ public class ShowsControllerTest {
     private static final String ERROR_MESSAGE_KEY = "message";
     private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
-    //TODO: remove hardcoded port
-    private static final String URL = "http://localhost:8081";
+    private static final String HOST = "http://localhost";
+    @Value("${server.port}")
+    private String SERVER_PORT;
     @Autowired
     private ShowsSubSystem showsSubSystem;
 
+    private String urlForTests() {
+        return HOST.concat(":").concat(SERVER_PORT);
+    }
 
     private Response loginAsJosePost() {
         return loginAsPost(USERNAME_JOSE, PASSWORD_JOSE);
@@ -75,7 +80,7 @@ public class ShowsControllerTest {
         }
         return given().contentType(JSON_CONTENT_TYPE)
                 .body(loginRequestBody.toString())
-                .post(URL + "/login");
+                .post(urlForTests() + "/login");
     }
 
 
@@ -134,7 +139,7 @@ public class ShowsControllerTest {
 
         given().contentType(JSON_CONTENT_TYPE)
                 .body(registerRequestBody.toString())
-                .post(URL + "/users/register");
+                .post(urlForTests() + "/users/register");
 
 //        var loginResponse = loginAsPost("apublishedusername", "444467890124");
 //        var token = getCookie(loginResponse);
@@ -145,7 +150,7 @@ public class ShowsControllerTest {
 
     @Test
     public void playingNowShowsOk() {
-        var response = get(URL + "/shows");
+        var response = get(urlForTests() + "/shows");
 
         response.then().body(SHOW_MOVIE_NAME_KEY,
                 hasItems(CRASH_TEA_MOVIE_NAME, SMALL_FISH_MOVIE_NAME,
@@ -159,7 +164,7 @@ public class ShowsControllerTest {
 
     @Test
     public void showOneOk() {
-        var response = get(URL + "/shows/1");
+        var response = get(urlForTests() + "/shows/1");
         // To avoid fragile tests, I use oneOf, as the movie assigned to show 1
         // might change
         response.then().body("info." + SHOW_MOVIE_NAME_KEY,
@@ -176,7 +181,7 @@ public class ShowsControllerTest {
         JSONArray seatsRequest = jsonBodyForReserveSeats(5, 7, 9);
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(seatsRequest.toString())
-                .post(URL + "/shows/1/reserve");
+                .post(urlForTests() + "/shows/1/reserve");
         response.then().body(ERROR_MESSAGE_KEY,
                 is(ShowsController.AUTHENTICATION_REQUIRED));
     }
@@ -205,7 +210,7 @@ public class ShowsControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(paymentRequest.toString())
-                .post(URL + "/shows/1/pay");
+                .post(urlForTests() + "/shows/1/pay");
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(ShowsController.AUTHENTICATION_REQUIRED));
@@ -294,14 +299,14 @@ public class ShowsControllerTest {
         return given().contentType(JSON_CONTENT_TYPE)
                 .cookie(TOKEN_COOKIE_NAME, token)
                 .body(paymentRequest.toString())
-                .post(URL + "/shows/" + showId + "/pay");
+                .post(urlForTests() + "/shows/" + showId + "/pay");
     }
 
     private Response reservePost(String token, JSONArray seatsRequest, int showId) {
         return given().contentType(JSON_CONTENT_TYPE)
                 .cookie(TOKEN_COOKIE_NAME, token)
                 .body(seatsRequest.toString())
-                .post(URL + "/shows/" + showId + "/reserve");
+                .post(urlForTests() + "/shows/" + showId + "/reserve");
     }
 
     private JSONArray jsonBodyForReserveSeats(Integer... seats) {

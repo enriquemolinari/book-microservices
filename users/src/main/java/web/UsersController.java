@@ -37,9 +37,7 @@ public class UsersController {
     @GetMapping("/users/profile")
     public ResponseEntity<UserProfile> userProfile(
             @CookieValue(required = false) String token) {
-
         var profile = ifAuthenticatedDo(token, usersSubSystem::profileFrom);
-
         return ResponseEntity.ok(profile);
     }
 

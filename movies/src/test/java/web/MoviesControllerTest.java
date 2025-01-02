@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -44,10 +45,15 @@ public class MoviesControllerTest {
     private static final String ERROR_MESSAGE_KEY = "message";
     private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
-    //TODO: remove hardcoded port
-    private static final String URL = "http://localhost:8081";
+    private static final String HOST = "http://localhost";
+    @Value("${server.port}")
+    private String SERVER_PORT;
     @Autowired
     private MoviesSubSystem moviesSubSystem;
+
+    private String urlForTests() {
+        return HOST.concat(":").concat(SERVER_PORT);
+    }
 
     //@Test
     public void aPublishedRegisteredUserItIsAllowedToRankAMovie() {
@@ -67,8 +73,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesOk() {
-        //RestAssured.port = 8091;
-        var response = get(URL + "/movies");
+        var response = get(urlForTests() + "/movies");
 
         response.then().body(MOVIE_NAME_KEY,
                 hasItems(CRASH_TEA_MOVIE_NAME,
@@ -79,7 +84,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesSortedRateOk() {
-        var response = get(URL + "/movies/sorted/rate");
+        var response = get(urlForTests() + "/movies/sorted/rate");
         response.then().body("[0].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         response.then().body("[1].name", is(SMALL_FISH_MOVIE_NAME));
         assertOnMovies(response);
@@ -87,7 +92,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesSortedReleaseDateOk() {
-        var response = get(URL + "/movies/sorted/releasedate");
+        var response = get(urlForTests() + "/movies/sorted/releasedate");
         response.then().body("[0].name", is(RUNNING_FAR_AWAY_MOVIE_NAME));
         response.then().body("[1].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         assertOnMovies(response);
@@ -95,7 +100,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesSearchOk() {
-        var response = get(URL + "/movies/search/rock");
+        var response = get(urlForTests() + "/movies/search/rock");
         response.then().body("[0].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         assertOnMovies(response);
     }
@@ -116,7 +121,7 @@ public class MoviesControllerTest {
 
     @Test
     public void movieOneOk() {
-        var response = get(URL + "/movies/1");
+        var response = get(urlForTests() + "/movies/1");
 
         response.then().body(MOVIE_NAME_KEY,
                 is(oneOf(SMALL_FISH_MOVIE_NAME, ROCK_IN_THE_SCHOOL_MOVIE_NAME,
@@ -134,7 +139,7 @@ public class MoviesControllerTest {
 
     @Test
     public void ratesFromMovieOneOk() {
-        var response = get(URL + "/movies/1/rate");
+        var response = get(urlForTests() + "/movies/1/rate");
 
         response.then().body(JSON_ROOT,
                 hasItem(allOf(both(hasEntry(USERNAME_KEY, "lucia")).and(
@@ -177,7 +182,7 @@ public class MoviesControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(rateRequestBody.toString())
-                .post(URL + "/movies/1/rate");
+                .post(urlForTests() + "/movies/1/rate");
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(MoviesController.AUTHENTICATION_REQUIRED));

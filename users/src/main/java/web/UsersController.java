@@ -15,6 +15,7 @@ import java.util.function.Function;
 public class UsersController {
 
     public static final String AUTHENTICATION_REQUIRED = "You must be logged in to perform this action...";
+    public static final String FW_GATEWAY_USER_ID = "fw-gateway-user-id";
     private static final String TOKEN_COOKIE_NAME = "token";
     private final UsersSubSystem usersSubSystem;
 
@@ -36,8 +37,8 @@ public class UsersController {
 
     @GetMapping("/users/profile")
     public ResponseEntity<UserProfile> userProfile(
-            @CookieValue(required = false) String token) {
-        var profile = ifAuthenticatedDo(token, usersSubSystem::profileFrom);
+            @RequestHeader(FW_GATEWAY_USER_ID) long userId) {
+        var profile = usersSubSystem.profileFrom(userId);
         return ResponseEntity.ok(profile);
     }
 
@@ -77,6 +78,13 @@ public class UsersController {
             headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
             return ResponseEntity.ok().headers(headers).build();
         });
+    }
+
+    //TODO: add a test
+    @PostMapping("/users/token")
+    public ResponseEntity<Long> userIdIfTokenValid(@RequestBody String token) {
+        Long userId = usersSubSystem.userIdFrom(token);
+        return ResponseEntity.ok(userId);
     }
 
     private <S> S ifAuthenticatedDo(String token, Function<Long, S> method) {

@@ -1,10 +1,10 @@
 server:
   ms:
     host: http://localhost
-  port: 8080
+  port: 8180
 port:
-  movies: 8091
-  shows: 8092
-  users: 8093
+  movies: 8191
+  shows: 8192
+  users: 8193
 httpclient:
   timeout: 160

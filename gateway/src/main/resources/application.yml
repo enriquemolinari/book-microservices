@@ -1,0 +1,34 @@
+forward:
+  requestHeaderUserId: "fw-gateway-user-id"
+users:
+  serverPort: ${server.ms.host}:${port.users}
+  tokenCookieParamName: "token"
+  uriTokenVerificationPath: "/users/token"
+spring:
+  cloud:
+    gateway:
+      routes:
+        # Movies
+        - id: movies_public_get
+          uri: ${server.ms.host}:${port.movies}
+          predicates:
+            - Path=/movies/**
+            - Method=GET
+        # Shows
+        - id: shows_public
+          uri: ${server.ms.host}:${port.shows}
+          predicates:
+            - Path=/shows/**
+            - Method=GET
+        # Users
+        - id: users_login_register
+          uri: ${server.ms.host}:${port.users}
+          predicates:
+            - Path=/users/login, /users/register
+            - Method=POST
+        - id: users_private
+          uri: ${server.ms.host}:${port.users}
+          predicates:
+            - Path=/users/changepassword, /users/logout, /users/profile
+          filters:
+            - TokenVerificationFilter

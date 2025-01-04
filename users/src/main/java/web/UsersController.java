@@ -35,14 +35,14 @@ public class UsersController {
                         request.repeatPassword()));
     }
 
-    @GetMapping("/users/profile")
+    @GetMapping("/users/private/profile")
     public ResponseEntity<UserProfile> userProfile(
             @RequestHeader(FW_GATEWAY_USER_ID) long userId) {
         var profile = usersSubSystem.profileFrom(userId);
         return ResponseEntity.ok(profile);
     }
 
-    @PostMapping("/users/changepassword")
+    @PostMapping("/users/private/changepassword")
     public ResponseEntity<Void> changePassword(
             @CookieValue(required = false) String token,
             @RequestBody ChangePasswordRequest passBody) {
@@ -68,7 +68,7 @@ public class UsersController {
         return ResponseEntity.ok().headers(headers).body(profile);
     }
 
-    @PostMapping("/users/logout")
+    @PostMapping("/users/private/logout")
     public ResponseEntity<Void> logout(
             @CookieValue(required = false) String token) {
         return ifAuthenticatedDo(token, (userId) -> {

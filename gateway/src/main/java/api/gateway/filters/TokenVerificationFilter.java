@@ -43,7 +43,7 @@ class TokenVerificationFilter extends AbstractGatewayFilterFactory<TokenVerifica
         }
         exchange.getResponse().getHeaders().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CONTENT_TYPE);
         String errorMsg = result.errorMsg() == null ? DEFAULT_ERROR_MSG : result.errorMsg();
-        String jsonRespond = "{\"error\": \"" + errorMsg + "\"}";
+        String jsonRespond = "{\"message\": \"" + errorMsg + "\"}";
         DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(jsonRespond.getBytes(StandardCharsets.UTF_8));
         return exchange.getResponse().writeWith(Mono.just(buffer));
     }

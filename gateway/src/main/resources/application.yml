@@ -8,6 +8,7 @@ spring:
   cloud:
     gateway:
       routes:
+        # Microservices
         # Movies
         - id: movies_public_get
           uri: ${server.ms.host}:${port.movies}
@@ -21,14 +22,14 @@ spring:
             - Path=/shows/**
             - Method=GET
         # Users
-        - id: users_login_register
+        - id: users_public
           uri: ${server.ms.host}:${port.users}
           predicates:
-            - Path=/users/login, /users/register
+            - Path=/users/**
             - Method=POST
         - id: users_private
           uri: ${server.ms.host}:${port.users}
           predicates:
-            - Path=/users/changepassword, /users/logout, /users/profile
+            - Path=/users/private/**
           filters:
             - TokenVerificationFilter

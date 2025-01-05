@@ -24,33 +24,40 @@ public class ApiGatewayIntegrationTest {
     public static final String USERS_PROFILE_URI_PATH = "/users/private/profile";
     public static final String FAKE_PROFILE_DATA = "{SOME PROFILE}";
     public static final String INVALID_TOKEN_MSG = "INVALID TOKEN";
+    public static final String MOVIES_RATE_URI_PATH = "/movies/private/1/rate";
+    public static final String USERS_ANY_PUBLIC_URI_PATH = "/users/any";
+    public static final String SOME_ANY_OK_MESSAGE = "some any ok message";
+    public static final String MOVIES_PUBLIC_URI_PATH = "/movies";
     private static final String NO_TOKEN_MSG = "Authentication is required";
-    ClientAndServer mockServer;
+    ClientAndServer usersMockServer;
     @Value("${port.users}")
     private int USERS_SERVER_PORT;
-    @Value("${server.port}")
-    private String SERVER_PORT;
+    @Value("${port.movies}")
+    private int MOVIES_SERVER_PORT;
     @Value("${forward.requestHeaderUserId}")
     private String REQUEST_HEADER_KEY_USER_ID;
     @Value("${users.tokenCookieParamName}")
     private String TOKEN_COOKIE_PARAM_NAME;
     @Autowired
     private WebTestClient testClient;
+    private ClientAndServer moviesMockServer;
 
     @BeforeEach
     public void startMockServer() {
-        mockServer = ClientAndServer.startClientAndServer(USERS_SERVER_PORT);
+        usersMockServer = ClientAndServer.startClientAndServer(USERS_SERVER_PORT);
+        moviesMockServer = ClientAndServer.startClientAndServer(MOVIES_SERVER_PORT);
     }
 
     @AfterEach
     public void stopMockServer() {
-        mockServer.stop();
+        usersMockServer.stop();
+        moviesMockServer.stop();
     }
 
     @Test
     public void privateUsersPathWithValidTokenOk() {
         mockTokenValidationEndPointRespondOk();
-        mockPrivateEndPointWithPath(USERS_PROFILE_URI_PATH);
+        mockPrivateEndPointWithPath(usersMockServer, USERS_PROFILE_URI_PATH);
         testClient.get()
                 .uri(USERS_PROFILE_URI_PATH)
                 .cookie(TOKEN_COOKIE_PARAM_NAME, FAKE_TOKEN)
@@ -61,7 +68,44 @@ public class ApiGatewayIntegrationTest {
     }
 
     @Test
-    public void privateUsersPathWithInvalidToken() {
+    public void privateMoviesPathWithValidTokenOk() {
+        mockTokenValidationEndPointRespondOk();
+        mockPrivateEndPointWithPath(moviesMockServer, MOVIES_RATE_URI_PATH);
+        testClient.post()
+                .uri(MOVIES_RATE_URI_PATH)
+                .cookie(TOKEN_COOKIE_PARAM_NAME, FAKE_TOKEN)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class).isEqualTo(FAKE_PROFILE_DATA);
+    }
+
+    @Test
+    public void publicUsersEndpointsAreForwardedOk() {
+        mockPublicEndPointWithPath(usersMockServer, USERS_ANY_PUBLIC_URI_PATH);
+        testClient.post()
+                .uri(USERS_ANY_PUBLIC_URI_PATH)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo(SOME_ANY_OK_MESSAGE);
+    }
+
+    @Test
+    public void publicMoviesEndpointsAreForwardedOk() {
+        mockPublicEndPointWithPath(moviesMockServer, MOVIES_PUBLIC_URI_PATH);
+        testClient.get()
+                .uri(MOVIES_PUBLIC_URI_PATH)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo(SOME_ANY_OK_MESSAGE);
+    }
+
+    @Test
+    public void privateEndpointsPathWithInvalidToken() {
         mockTokenValidationEndPointRespondInvalid();
         testClient.get()
                 .uri(USERS_PROFILE_URI_PATH)
@@ -84,15 +128,24 @@ public class ApiGatewayIntegrationTest {
                 .isEqualTo("{\"message\": \"" + NO_TOKEN_MSG + "\"}");
     }
 
-    private void mockPrivateEndPointWithPath(String privateEndPointUriPath) {
-        mockServer.when(request()
+    private void mockPrivateEndPointWithPath(ClientAndServer mockServerUsed
+            , String privateEndPointUriPath) {
+        mockServerUsed.when(request()
                         .withPath(privateEndPointUriPath)
                         .withHeader(REQUEST_HEADER_KEY_USER_ID, FAKE_USER_ID))
                 .respond(response().withBody(FAKE_PROFILE_DATA));
     }
 
+    private void mockPublicEndPointWithPath(ClientAndServer mockServerUsed
+            , String publicEndPointUriPath) {
+        mockServerUsed.when(request()
+                        .withPath(publicEndPointUriPath))
+                .respond(response().withBody(SOME_ANY_OK_MESSAGE));
+    }
+
+
     private void mockTokenValidationEndPointRespondOk() {
-        mockServer.when(request()
+        usersMockServer.when(request()
                         .withMethod(METHOD_POST)
                         .withBody(FAKE_TOKEN)
                         .withPath(VERIFY_TOKEN_URI_PATH))
@@ -100,7 +153,7 @@ public class ApiGatewayIntegrationTest {
     }
 
     private void mockTokenValidationEndPointRespondInvalid() {
-        mockServer.when(request()
+        usersMockServer.when(request()
                         .withMethod(METHOD_POST)
                         .withBody(FAKE_TOKEN)
                         .withPath(VERIFY_TOKEN_URI_PATH))

@@ -10,6 +10,12 @@ spring:
       routes:
         # Microservices
         # Movies
+        - id: movies_private
+          uri: ${server.ms.host}:${port.movies}
+          predicates:
+            - Path=/movies/private/**
+          filters:
+            - TokenVerificationFilter
         - id: movies_public_get
           uri: ${server.ms.host}:${port.movies}
           predicates:

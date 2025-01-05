@@ -22,18 +22,21 @@ public class ApiGatewayIntegrationTest {
     public static final String VERIFY_TOKEN_URI_PATH = "/users/token";
     public static final String FAKE_USER_ID = "114";
     public static final String USERS_PROFILE_URI_PATH = "/users/private/profile";
-    public static final String FAKE_PROFILE_DATA = "{SOME PROFILE}";
     public static final String INVALID_TOKEN_MSG = "INVALID TOKEN";
     public static final String MOVIES_RATE_URI_PATH = "/movies/private/1/rate";
     public static final String USERS_ANY_PUBLIC_URI_PATH = "/users/any";
     public static final String SOME_ANY_OK_MESSAGE = "some any ok message";
     public static final String MOVIES_PUBLIC_URI_PATH = "/movies";
+    public static final String SHOWS_ANY_PUBLIC_URI = "/shows/any";
+    public static final String SHOWS_PRIVATE_ANY = "/shows/private/any";
     private static final String NO_TOKEN_MSG = "Authentication is required";
     ClientAndServer usersMockServer;
     @Value("${port.users}")
     private int USERS_SERVER_PORT;
     @Value("${port.movies}")
     private int MOVIES_SERVER_PORT;
+    @Value("${port.shows}")
+    private int SHOWS_SERVER_PORT;
     @Value("${forward.requestHeaderUserId}")
     private String REQUEST_HEADER_KEY_USER_ID;
     @Value("${users.tokenCookieParamName}")
@@ -41,17 +44,33 @@ public class ApiGatewayIntegrationTest {
     @Autowired
     private WebTestClient testClient;
     private ClientAndServer moviesMockServer;
+    private ClientAndServer showsMockServer;
 
     @BeforeEach
     public void startMockServer() {
         usersMockServer = ClientAndServer.startClientAndServer(USERS_SERVER_PORT);
         moviesMockServer = ClientAndServer.startClientAndServer(MOVIES_SERVER_PORT);
+        showsMockServer = ClientAndServer.startClientAndServer(SHOWS_SERVER_PORT);
     }
 
     @AfterEach
     public void stopMockServer() {
         usersMockServer.stop();
         moviesMockServer.stop();
+        showsMockServer.stop();
+    }
+
+    @Test
+    public void privateShowsPathWithValidTokenOk() {
+        mockTokenValidationEndPointRespondOk();
+        mockPrivateEndPointWithPath(showsMockServer, SHOWS_PRIVATE_ANY);
+        testClient.get()
+                .uri(SHOWS_PRIVATE_ANY)
+                .cookie(TOKEN_COOKIE_PARAM_NAME, FAKE_TOKEN)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class).isEqualTo(SOME_ANY_OK_MESSAGE);
     }
 
     @Test
@@ -64,7 +83,7 @@ public class ApiGatewayIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(String.class).isEqualTo(FAKE_PROFILE_DATA);
+                .expectBody(String.class).isEqualTo(SOME_ANY_OK_MESSAGE);
     }
 
     @Test
@@ -77,7 +96,19 @@ public class ApiGatewayIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(String.class).isEqualTo(FAKE_PROFILE_DATA);
+                .expectBody(String.class).isEqualTo(SOME_ANY_OK_MESSAGE);
+    }
+
+    @Test
+    public void publicShowsEndpointsAreForwardedOk() {
+        mockPublicEndPointWithPath(showsMockServer, SHOWS_ANY_PUBLIC_URI);
+        testClient.post()
+                .uri(SHOWS_ANY_PUBLIC_URI)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo(SOME_ANY_OK_MESSAGE);
     }
 
     @Test
@@ -133,7 +164,7 @@ public class ApiGatewayIntegrationTest {
         mockServerUsed.when(request()
                         .withPath(privateEndPointUriPath)
                         .withHeader(REQUEST_HEADER_KEY_USER_ID, FAKE_USER_ID))
-                .respond(response().withBody(FAKE_PROFILE_DATA));
+                .respond(response().withBody(SOME_ANY_OK_MESSAGE));
     }
 
     private void mockPublicEndPointWithPath(ClientAndServer mockServerUsed

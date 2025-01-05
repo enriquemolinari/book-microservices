@@ -22,11 +22,16 @@ spring:
             - Path=/movies/**
             - Method=GET
         # Shows
+        - id: shows_private
+          uri: ${server.ms.host}:${port.shows}
+          predicates:
+            - Path=/shows/private/**
+          filters:
+            - TokenVerificationFilter
         - id: shows_public
           uri: ${server.ms.host}:${port.shows}
           predicates:
             - Path=/shows/**
-            - Method=GET
         # Users
         - id: users_public
           uri: ${server.ms.host}:${port.users}

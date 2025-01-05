@@ -1,12 +1,11 @@
 package web;
 
-import api.MoviesSubSystem;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
 import main.Main;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -15,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static web.MoviesController.FW_GATEWAY_USER_ID;
 
 @SpringBootTest(classes = Main.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 // Note: This test starts with a sample database and retains it until all tests are completed.
@@ -23,7 +23,8 @@ import static org.hamcrest.Matchers.*;
 @ActiveProfiles(value = "test")
 public class MoviesControllerTest {
 
-    private static final String PASSWORD_KEY = "password";
+    public static final String NICO_USER_ID = "2";
+    public static final String NICO_USERNAME = "nico";
     private static final String COMMENT_KEY = "comment";
     private static final String RATE_VALUE_KEY = "rateValue";
     private static final String USERNAME_KEY = "username";
@@ -37,38 +38,18 @@ public class MoviesControllerTest {
     private static final String MOVIE_DURATION_KEY = "duration";
     private static final String MOVIE_PLOT_KEY = "plot";
     private static final String MOVIE_GENRES_KEY = "genres";
-    private static final String SHOW_MOVIE_NAME_KEY = "movieName";
     private static final String ROCK_IN_THE_SCHOOL_MOVIE_NAME = "Rock in the School";
     private static final String RUNNING_FAR_AWAY_MOVIE_NAME = "Running far Away";
     private static final String SMALL_FISH_MOVIE_NAME = "Small Fish";
     private static final String CRASH_TEA_MOVIE_NAME = "Crash Tea";
     private static final String ERROR_MESSAGE_KEY = "message";
-    private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String HOST = "http://localhost";
     @Value("${server.port}")
     private String SERVER_PORT;
-    @Autowired
-    private MoviesSubSystem moviesSubSystem;
 
     private String urlForTests() {
         return HOST.concat(":").concat(SERVER_PORT);
-    }
-
-    //@Test
-    public void aPublishedRegisteredUserItIsAllowedToRankAMovie() {
-        //TODO: como voy a testear esto? Generando un token a manopla?
-//        var userId = this.usersSubSystem.registerUser("ausertopublish2",
-//                "surname",
-//                "auser@unmail.com",
-//                "ausertopublish2",
-//                "444467890124",
-//                "444467890124");
-//        var userRateMovie = this.moviesSubSystem.rateMovieBy(userId,
-//                4L,
-//                4,
-//                "fantastic");
-//        assertEquals("ausertopublish2", userRateMovie.username());
     }
 
     @Test
@@ -148,33 +129,29 @@ public class MoviesControllerTest {
                         .and(hasEntry(RATE_VALUE_KEY, 4)))));
 
         response.then().body(JSON_ROOT,
-                hasItem(allOf(both(hasEntry(USERNAME_KEY, "nico")).and(
+                hasItem(allOf(both(hasEntry(USERNAME_KEY, NICO_USERNAME)).and(
                                 (hasEntry(COMMENT_KEY,
                                         "Fantastic! The actors, the music, everything is fantastic!")))
                         .and(hasEntry(RATE_VALUE_KEY, 5)))));
     }
 
-    //@Test
-    //TODO: como testeo esto?
+    @Test
     public void rateMovieOk() throws JSONException {
-//        var token = loginAsJoseAndGetCookie();
-//
-//        JSONObject rateRequestBody = new JSONObject();
-//        rateRequestBody.put(RATE_VALUE_KEY, 4);
-//        rateRequestBody.put(COMMENT_KEY, "a comment...");
-//
-//        var response = given().contentType(JSON_CONTENT_TYPE)
-//                .cookie(TOKEN_COOKIE_NAME, token)
-//                .body(rateRequestBody.toString())
-//                .post(URL + "/movies/2/rate");
-//
-//        response.then().body(USERNAME_KEY, is(USERNAME_JOSE))
-//                .body(RATE_VALUE_KEY, is(4))
-//                .body(COMMENT_KEY, is("a comment..."));
+        JSONObject rateRequestBody = new JSONObject();
+        rateRequestBody.put(RATE_VALUE_KEY, 4);
+        rateRequestBody.put(COMMENT_KEY, "a comment...");
+
+        var response = given().contentType(JSON_CONTENT_TYPE)
+                .header(new Header(FW_GATEWAY_USER_ID, NICO_USER_ID))
+                .body(rateRequestBody.toString())
+                .post(urlForTests() + "/movies/private/" + NICO_USER_ID + "/rate");
+
+        response.then().body(USERNAME_KEY, is(NICO_USERNAME))
+                .body(RATE_VALUE_KEY, is(4))
+                .body(COMMENT_KEY, is("a comment..."));
     }
 
-    //@Test
-    //TODO: ver que hago con esto...
+    @Test
     public void rateMovieFailIfNotAuthenticated() throws JSONException {
         JSONObject rateRequestBody = new JSONObject();
         rateRequestBody.put(RATE_VALUE_KEY, 4);
@@ -182,14 +159,9 @@ public class MoviesControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(rateRequestBody.toString())
-                .post(urlForTests() + "/movies/1/rate");
+                .post(urlForTests() + "/movies/private/1/rate");
 
-        response.then().body(ERROR_MESSAGE_KEY,
+        response.then().statusCode(401).body(ERROR_MESSAGE_KEY,
                 is(MoviesController.AUTHENTICATION_REQUIRED));
     }
-
-    private String getCookie(Response loginResponse) {
-        return loginResponse.getCookie(TOKEN_COOKIE_NAME);
-    }
-
 }

@@ -1,6 +1,7 @@
 package web;
 
 import api.MovieInfo;
+import api.MoviesAuthException;
 import api.MoviesSubSystem;
 import api.UserMovieRate;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 public class MoviesController {
 
     public static final String AUTHENTICATION_REQUIRED = "You must be logged in to perform this action...";
+    public static final String FW_GATEWAY_USER_ID = "fw-gateway-user-id";
 
     private final MoviesSubSystem moviesSubSystem;
 
@@ -58,25 +60,23 @@ public class MoviesController {
         return ResponseEntity.ok(moviesSubSystem.pagedRatesOfOrderedDate(id, page));
     }
 
-    @PostMapping("/movies/{movieId}/rate")
+    @PostMapping("/movies/private/{movieId}/rate")
     public ResponseEntity<UserMovieRate> rateMovie(
-            @CookieValue(required = false) String token,
+            @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId,
             @PathVariable Long movieId, @RequestBody RateRequest rateRequest) {
 
-        var userMovieRated = ifAuthenticatedDo(token, userId -> {
-            return this.moviesSubSystem.rateMovieBy(userId, movieId,
+        var userMovieRated = ifUserIdInHeaderDo(userId, (uid) -> {
+            return this.moviesSubSystem.rateMovieBy(uid, movieId,
                     rateRequest.rateValue(), rateRequest.comment());
         });
 
         return ResponseEntity.ok(userMovieRated);
     }
 
-    private <S> S ifAuthenticatedDo(String token, Function<Long, S> method) {
-        return null;
-//        var userId = Optional.ofNullable(token).map(this.usersSubSystem::userIdFrom).
-//                orElseThrow(() -> new AuthException(
-//                        AUTHENTICATION_REQUIRED));
-//
-//        return method.apply(userId);
+    private <S> S ifUserIdInHeaderDo(Long userId, Function<Long, S> method) {
+        if (userId == null) {
+            throw new MoviesAuthException(AUTHENTICATION_REQUIRED);
+        }
+        return method.apply(userId);
     }
 }

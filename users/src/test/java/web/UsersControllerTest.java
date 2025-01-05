@@ -7,6 +7,8 @@ import main.Main;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -142,9 +144,23 @@ public class UsersControllerTest {
                 .cookie(TOKEN_COOKIE_NAME, containsString("v2.local"));
     }
 
-    @Test
-    public void retrieveUserProfileFailIfNotAuthenticated() {
-        var response = get(urlForTests() + "/users/private/profile");
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/private/profile"})
+    public void privateGetEndpointsFailIfNotAuthenticated(String uriPath) {
+        var response = get(urlForTests() + uriPath);
+
+        response.then().body(ERROR_MESSAGE_KEY,
+                is(UsersController.AUTHENTICATION_REQUIRED));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/private/logout"
+            , "/users/private/changepassword"})
+    public void privatePostEndpointsFailIfNotAuthenticated(String uriPath) throws JSONException {
+        JSONObject changePassRequestBody = changePasswordBody();
+        var response = given().contentType(JSON_CONTENT_TYPE)
+                .body(changePassRequestBody.toString())
+                .post(urlForTests() + uriPath);
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));

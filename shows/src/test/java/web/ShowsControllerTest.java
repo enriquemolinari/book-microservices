@@ -1,28 +1,25 @@
 package web;
 
-import api.ShowsSubSystem;
 import io.restassured.response.Response;
 import main.Main;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static web.ShowsController.FW_GATEWAY_USER_ID;
 
 @SpringBootTest(classes = Main.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 // Note: This test starts with a sample database and retains it until all tests are completed.
@@ -34,8 +31,6 @@ public class ShowsControllerTest {
     private static final String INFO_KEY = "info";
     private static final String SEAT_AVAILABLE_KEY = "available";
     private static final String CURRENT_SEATS_KEY = "currentSeats";
-    private static final String PASSWORD_KEY = "password";
-    private static final String USERNAME_KEY = "username";
     private static final String JSON_ROOT = "$";
     private static final String MOVIE_DURATION_KEY = "duration";
     private static final String SHOW_MOVIE_NAME_KEY = "movieName";
@@ -43,109 +38,14 @@ public class ShowsControllerTest {
     private static final String RUNNING_FAR_AWAY_MOVIE_NAME = "Running far Away";
     private static final String SMALL_FISH_MOVIE_NAME = "Small Fish";
     private static final String CRASH_TEA_MOVIE_NAME = "Crash Tea";
-    private static final String PASSWORD_JOSE = "123456789012";
-    private static final String USERNAME_JOSE = "jsimini";
     private static final String ERROR_MESSAGE_KEY = "message";
-    private static final String TOKEN_COOKIE_NAME = "token";
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String HOST = "http://localhost";
     @Value("${server.port}")
     private String SERVER_PORT;
-    @Autowired
-    private ShowsSubSystem showsSubSystem;
 
     private String urlForTests() {
         return HOST.concat(":").concat(SERVER_PORT);
-    }
-
-    private Response loginAsJosePost() {
-        return loginAsPost(USERNAME_JOSE, PASSWORD_JOSE);
-    }
-
-    private Response loginAsNicoPost() {
-        return loginAsPost("nico", "123456789012");
-    }
-
-    private Response loginAsLuciaPost() {
-        return loginAsPost("lucia", "123456789012");
-    }
-
-    private Response loginAsPost(String userName, String password) {
-        JSONObject loginRequestBody = new JSONObject();
-        try {
-            loginRequestBody.put(USERNAME_KEY, userName);
-            loginRequestBody.put(PASSWORD_KEY, password);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return given().contentType(JSON_CONTENT_TYPE)
-                .body(loginRequestBody.toString())
-                .post(urlForTests() + "/login");
-    }
-
-
-    //@Test
-    //TODO: re-write
-    public void aPublishedTicketSoldChangePointsWonInUserProfile() {
-        this.showsSubSystem.reserve(1L, 3L, Set.of(2, 3, 5, 6));
-        this.showsSubSystem.pay(1L,
-                3L,
-                Set.of(2, 3),
-                "numero",
-                YearMonth.of(YearMonth.now().getYear(), YearMonth.now().getMonth()),
-                "code1");
-        this.showsSubSystem.pay(1L,
-                3L,
-                Set.of(5, 6),
-                "numero",
-                YearMonth.of(YearMonth.now().getYear(), YearMonth.now().getMonth()),
-                "code1");
-//        var profile = this.usersSubSystem.profileFrom(1l);
-//        assertEquals(20, profile.points());
-    }
-
-    //@Test
-    //TODO: re-write
-    public void aPublishedTicketSoldPushANotificationJob() {
-        Set<Integer> selectedSeats = Set.of(12, 13);
-        this.showsSubSystem.reserve(1L, 3L, selectedSeats);
-        this.showsSubSystem.pay(1L,
-                3L,
-                selectedSeats,
-                "numero",
-                YearMonth.of(YearMonth.now().getYear(), YearMonth.now().getMonth()),
-                "code1");
-//        List<String[]> jobs = this.notificationsSubSystem.allJobs();
-//        var showInfo = this.showsSubSystem.show(3L);
-//        int lastJob = jobs.size() - 1;
-//        JsonPath jsonPath = new JsonPath(jobs.get(lastJob)[1]);
-//        assertEquals(1, jsonPath.getInt("idUser"));
-//        assertTrue(selectedSeats.containsAll(jsonPath.getList("payedSeats")));
-//        assertTrue(jsonPath.getList("payedSeats").containsAll(selectedSeats));
-//        assertEquals(10, jsonPath.getInt("pointsWon"));
-//        assertEquals(showInfo.info().playingTime(), jsonPath.getString("showStartTime"));
-    }
-
-    //@Test
-    //TODO: re-write once security is in place
-    public void aPublishedRegisteredUserItIsAllowedToReserve() throws JSONException {
-        JSONObject registerRequestBody = new JSONObject();
-        registerRequestBody.put("name", "apublisheduser");
-        registerRequestBody.put("surname", "ausersurname");
-        registerRequestBody.put("email", "auser2@ma.com");
-        registerRequestBody.put(USERNAME_KEY, "apublishedusername");
-        registerRequestBody.put(PASSWORD_KEY, "444467890124");
-        registerRequestBody.put("repeatPassword", "444467890124");
-
-        given().contentType(JSON_CONTENT_TYPE)
-                .body(registerRequestBody.toString())
-                .post(urlForTests() + "/users/register");
-
-//        var loginResponse = loginAsPost("apublishedusername", "444467890124");
-//        var token = getCookie(loginResponse);
-//        JSONArray seatsRequest = jsonBodyForReserveSeats(29);
-//        var response = reservePost(token, seatsRequest, 1);
-//        response.then().statusCode(200);
     }
 
     @Test
@@ -175,34 +75,29 @@ public class ShowsControllerTest {
         response.then().body(INFO_KEY, hasKey("movieDuration"));
     }
 
-    //@Test
-    //TODO: re-write once security is in place
+    @Test
     public void reserveAShowFailIfNotAuthenticated() {
         JSONArray seatsRequest = jsonBodyForReserveSeats(5, 7, 9);
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(seatsRequest.toString())
-                .post(urlForTests() + "/shows/1/reserve");
+                .post(urlForTests() + "/shows/private/1/reserve");
         response.then().body(ERROR_MESSAGE_KEY,
                 is(ShowsController.AUTHENTICATION_REQUIRED));
     }
 
-    //@Test
-    //TODO: re-write once security is in place
+    @Test
     public void reserveAlreadyReservedShowFail() {
-        var token = loginAsNicoAndGetCookie();
         JSONArray seatsRequest = jsonBodyForReserveSeats(7);
-        reservePost(token, seatsRequest, 1);
+        reservePost("2", seatsRequest, 1);
 
-        var tokenJose = loginAsJoseAndGetCookie();
         JSONArray seatsRequest2 = jsonBodyForReserveSeats(5, 7, 9);
-        var failedResponse = reservePost(tokenJose, seatsRequest2, 1);
+        var failedResponse = reservePost("1", seatsRequest2, 1);
 
         failedResponse.then().body(ERROR_MESSAGE_KEY,
                 is("All or some of the seats chosen are busy"));
     }
 
-    //@Test
-    //TODO: re-write once security is in place
+    @Test
     public void payAShowFailIfNotAuthenticated() throws JSONException {
         JSONArray seatsRequest = jsonBodyForReserveSeats(2, 3, 7);
 
@@ -210,36 +105,32 @@ public class ShowsControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(paymentRequest.toString())
-                .post(urlForTests() + "/shows/1/pay");
+                .post(urlForTests() + "/shows/private/1/pay");
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(ShowsController.AUTHENTICATION_REQUIRED));
     }
 
-    //@Test
-    //TODO: re-write once security is in place
+    @Test
     public void payNotReservedSeatsFail() throws JSONException {
-        var token = loginAsNicoAndGetCookie();
         JSONArray seatsRequest = jsonBodyForReserveSeats(2, 3, 7);
 
         JSONObject paymentRequest = paymentRequestForSeats(seatsRequest);
 
-        var failedResponse = payPost(token, paymentRequest, 1);
+        var failedResponse = payShowOneForUserTwoPost(paymentRequest);
 
         failedResponse.then().body(ERROR_MESSAGE_KEY,
                 is("Reservation is required before confirm"));
     }
 
-    //@Test
-    //TODO: re-write once security is in place
+    @Test
     public void payReservedShowOk() throws JSONException {
-        var token = loginAsNicoAndGetCookie();
         JSONArray seatsRequest = jsonBodyForReserveSeats(12, 13, 17);
-        reservePost(token, seatsRequest, 1);
+        reservePost("2", seatsRequest, 1);
 
         JSONObject paymentRequest = paymentRequestForSeats(seatsRequest);
 
-        var response = payPost(token, paymentRequest, 1);
+        var response = payShowOneForUserTwoPost(paymentRequest);
 
         response.then().body(SHOW_MOVIE_NAME_KEY,
                 is(oneOf(SMALL_FISH_MOVIE_NAME, ROCK_IN_THE_SCHOOL_MOVIE_NAME,
@@ -261,8 +152,7 @@ public class ShowsControllerTest {
         return paymentRequest;
     }
 
-    //@Test
-    //TODO: re-write once security is in place
+    @Test
     public void reserveAShowOk() {
         var response = reserveSeatsTwoFourFromShowTwoPost();
 
@@ -288,25 +178,23 @@ public class ShowsControllerTest {
     }
 
     private Response reserveSeatsTwoFourFromShowTwoPost() {
-        var token = loginAsJoseAndGetCookie();
-
         JSONArray seatsRequest = jsonBodyForReserveSeats(2, 4);
 
-        return reservePost(token, seatsRequest, 2);
+        return reservePost("1", seatsRequest, 2);
     }
 
-    private Response payPost(String token, JSONObject paymentRequest, int showId) {
+    private Response payShowOneForUserTwoPost(JSONObject paymentRequest) {
         return given().contentType(JSON_CONTENT_TYPE)
-                .cookie(TOKEN_COOKIE_NAME, token)
+                .header(FW_GATEWAY_USER_ID, "2")
                 .body(paymentRequest.toString())
-                .post(urlForTests() + "/shows/" + showId + "/pay");
+                .post(urlForTests() + "/shows/private/" + 1 + "/pay");
     }
 
-    private Response reservePost(String token, JSONArray seatsRequest, int showId) {
+    private Response reservePost(String userId, JSONArray seatsRequest, int showId) {
         return given().contentType(JSON_CONTENT_TYPE)
-                .cookie(TOKEN_COOKIE_NAME, token)
+                .header(FW_GATEWAY_USER_ID, userId)
                 .body(seatsRequest.toString())
-                .post(urlForTests() + "/shows/" + showId + "/reserve");
+                .post(urlForTests() + "/shows/private/" + showId + "/reserve");
     }
 
     private JSONArray jsonBodyForReserveSeats(Integer... seats) {
@@ -315,24 +203,5 @@ public class ShowsControllerTest {
             seatsRequest.put(seat);
         }
         return seatsRequest;
-    }
-
-    private String loginAsLuciaAndGetCookie() {
-        var loginResponse = loginAsLuciaPost();
-        return getCookie(loginResponse);
-    }
-
-    private String loginAsNicoAndGetCookie() {
-        var loginResponse = loginAsNicoPost();
-        return getCookie(loginResponse);
-    }
-
-    private String getCookie(Response loginResponse) {
-        return loginResponse.getCookie(TOKEN_COOKIE_NAME);
-    }
-
-    private String loginAsJoseAndGetCookie() {
-        var loginResponse = loginAsJosePost();
-        return getCookie(loginResponse);
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.function.Function;
 
 @RestController
+//Note: there is a convention with API Gateway team.
+// Those endpoints that must be secured must be prefixed with /users/private
 public class UsersController {
 
     public static final String AUTHENTICATION_REQUIRED = "You must be logged in to perform this action...";

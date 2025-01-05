@@ -8,7 +8,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 @RestController
@@ -27,7 +26,6 @@ public class UsersController {
     @PostMapping("/users/register")
     public ResponseEntity<Long> userRegistration(
             @RequestBody UserRegistrationRequest request) {
-
         return ResponseEntity
                 .ok(usersSubSystem.registerUser(request.name(), request.surname(),
                         request.email(),
@@ -37,23 +35,25 @@ public class UsersController {
 
     @GetMapping("/users/private/profile")
     public ResponseEntity<UserProfile> userProfile(
-            @RequestHeader(FW_GATEWAY_USER_ID) long userId) {
-        var profile = usersSubSystem.profileFrom(userId);
-        return ResponseEntity.ok(profile);
+            // Although this request header is required, I don't want to define it that way
+            // because Spring would respond with an error message, and I prefer not to expose
+            // such details to end users for security reasons.
+            @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId) {
+        return ifUserIdInHeaderDo(userId, uid -> {
+            var profile = usersSubSystem.profileFrom(uid);
+            return ResponseEntity.ok(profile);
+        });
     }
 
     @PostMapping("/users/private/changepassword")
     public ResponseEntity<Void> changePassword(
-            @CookieValue(required = false) String token,
+            @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId,
             @RequestBody ChangePasswordRequest passBody) {
-
-        ifAuthenticatedDo(token, userId -> {
+        return ifUserIdInHeaderDo(userId, uid -> {
             usersSubSystem.changePassword(userId, passBody.currentPassword(),
                     passBody.newPassword1(), passBody.newPassword2());
-            return null;
+            return ResponseEntity.ok().build();
         });
-
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/users/login")
@@ -70,8 +70,8 @@ public class UsersController {
 
     @PostMapping("/users/private/logout")
     public ResponseEntity<Void> logout(
-            @CookieValue(required = false) String token) {
-        return ifAuthenticatedDo(token, (userId) -> {
+            @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId) {
+        return ifUserIdInHeaderDo(userId, (uid) -> {
             var cookie = ResponseCookie.from(TOKEN_COOKIE_NAME, null)
                     .httpOnly(true).maxAge(0).build();
             var headers = new HttpHeaders();
@@ -80,18 +80,16 @@ public class UsersController {
         });
     }
 
-    //TODO: add a test
     @PostMapping("/users/token")
     public ResponseEntity<Long> userIdIfTokenValid(@RequestBody String token) {
         Long userId = usersSubSystem.userIdFrom(token);
         return ResponseEntity.ok(userId);
     }
 
-    private <S> S ifAuthenticatedDo(String token, Function<Long, S> method) {
-        var userId = Optional.ofNullable(token).map(this.usersSubSystem::userIdFrom).
-                orElseThrow(() -> new AuthException(
-                        AUTHENTICATION_REQUIRED));
-
+    private <S> S ifUserIdInHeaderDo(Long userId, Function<Long, S> method) {
+        if (userId == null) {
+            throw new AuthException(AUTHENTICATION_REQUIRED);
+        }
         return method.apply(userId);
     }
 }

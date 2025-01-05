@@ -1,6 +1,7 @@
 package web;
 
 import api.UsersSubSystem;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
 import main.Main;
 import org.json.JSONException;
@@ -16,6 +17,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static web.UsersController.FW_GATEWAY_USER_ID;
 
 @SpringBootTest(classes = Main.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 // Note: This test starts with a sample database and retains it until all tests are completed.
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class UsersControllerTest {
 
     public static final String LOGIN_URI = "/users/login";
+    public static final String CHANGE_PASS_URI_PATH = "/users/private/changepassword";
     private static final String CHANGE_PASS_BODY_CURRENT_PASS = "currentPassword";
     private static final String CHANGE_PASS_BODY_PASSWORD1 = "newPassword1";
     private static final String CHANGE_PASS_BODY_PASSWORD2 = "newPassword2";
@@ -62,11 +65,9 @@ public class UsersControllerTest {
 
     @Test
     public void logoutOk() {
-        var token = loginAsJoseAndGetCookie();
-
         var response = given().contentType(JSON_CONTENT_TYPE)
-                .cookie(TOKEN_COOKIE_NAME, token)
-                .post(urlForTests() + "/users/logout");
+                .header(new Header(FW_GATEWAY_USER_ID, "114"))
+                .post(urlForTests() + "/users/private/logout");
 
         var cookie = response.getDetailedCookie(TOKEN_COOKIE_NAME);
         assertEquals(0, cookie.getMaxAge());
@@ -96,6 +97,14 @@ public class UsersControllerTest {
         return given().contentType(JSON_CONTENT_TYPE)
                 .body(loginRequestBody.toString())
                 .post(urlForTests() + LOGIN_URI);
+    }
+
+    private Long userIdFromValidToken(String token) {
+        return given()
+                .body(token)
+                .post(urlForTests() + "/users/token")
+                .getBody()
+                .as(Long.class);
     }
 
     @Test
@@ -133,24 +142,9 @@ public class UsersControllerTest {
                 .cookie(TOKEN_COOKIE_NAME, containsString("v2.local"));
     }
 
-
-//    @Test
-//    public void aPublishedRegisteredUserItIsAllowedToBeNotified() {
-//        var userId = this.usersSubSystem.registerUser("ausertopublish3",
-//                "surname",
-//                "auser3@unmail.com",
-//                "ausertopublish3",
-//                "444467890124",
-//                "444467890124");
-//        var user = this.notificationsSubSystem.userBy(userId);
-//        assertEquals("ausertopublish3", user[1]);
-//        assertEquals("auser3@unmail.com", user[2]);
-//    }
-
-
     @Test
     public void retrieveUserProfileFailIfNotAuthenticated() {
-        var response = get(urlForTests() + "/users/profile");
+        var response = get(urlForTests() + "/users/private/profile");
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
@@ -159,13 +153,14 @@ public class UsersControllerTest {
     @Test
     public void changePasswordFailPasswordsDoesNotMatch() throws JSONException {
         var token = loginAsLuciaAndGetCookie();
+        Long userId = userIdFromValidToken(token);
         JSONObject changePassRequestBody = changePasswordBody();
         changePassRequestBody.put(CHANGE_PASS_BODY_PASSWORD2,
                 "anotherpassword");
         var response = given().contentType(JSON_CONTENT_TYPE)
-                .cookie(TOKEN_COOKIE_NAME, token)
+                .header(new Header(FW_GATEWAY_USER_ID, userId.toString()))
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + "/users/changepassword");
+                .post(urlForTests() + CHANGE_PASS_URI_PATH);
         assertEquals(500, response.statusCode());
         response.then().body(ERROR_MESSAGE_KEY,
                 is("Passwords must be equals"));
@@ -177,7 +172,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + "/users/changepassword");
+                .post(urlForTests() + CHANGE_PASS_URI_PATH);
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
@@ -186,13 +181,13 @@ public class UsersControllerTest {
     @Test
     public void changePasswordOk() throws JSONException {
         var token = loginAsLuciaAndGetCookie();
-
+        Long userId = userIdFromValidToken(token);
         JSONObject changePassRequestBody = changePasswordBody();
 
         var response = given().contentType(JSON_CONTENT_TYPE)
-                .cookie(TOKEN_COOKIE_NAME, token)
+                .header(new Header(FW_GATEWAY_USER_ID, userId.toString()))
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + "/users/changepassword");
+                .post(urlForTests() + CHANGE_PASS_URI_PATH);
 
         assertEquals(200, response.statusCode());
     }
@@ -212,10 +207,10 @@ public class UsersControllerTest {
     @Test
     public void retrieveUserProfileOk() {
         var token = loginAsJoseAndGetCookie();
-
+        Long userId = userIdFromValidToken(token);
         var response = given()
-                .cookie(TOKEN_COOKIE_NAME, token)
-                .get(urlForTests() + "/users/profile");
+                .header(new Header(FW_GATEWAY_USER_ID, userId.toString()))
+                .get(urlForTests() + "/users/private/profile");
 
         response.then().body(USERNAME_KEY, is(USERNAME_JOSE))
                 .body(FULLNAME_KEY, is(JOSE_FULLNAME))

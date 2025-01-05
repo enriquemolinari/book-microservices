@@ -1,6 +1,5 @@
 package web;
 
-import api.UsersSubSystem;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import main.Main;
@@ -48,7 +47,6 @@ public class UsersControllerTest {
     private static final String HOST = "http://localhost";
     @Value("${server.port}")
     private String SERVER_PORT;
-    private UsersSubSystem usersSubSystem;
 
     private String urlForTests() {
         return HOST.concat(":").concat(SERVER_PORT);
@@ -79,11 +77,7 @@ public class UsersControllerTest {
     private Response loginAsJosePost() {
         return loginAsPost(USERNAME_JOSE, PASSWORD_JOSE);
     }
-
-    private Response loginAsNicoPost() {
-        return loginAsPost("nico", "123456789012");
-    }
-
+    
     private Response loginAsLuciaPost() {
         return loginAsPost("lucia", "123456789012");
     }
@@ -236,11 +230,6 @@ public class UsersControllerTest {
 
     private String loginAsLuciaAndGetCookie() {
         var loginResponse = loginAsLuciaPost();
-        return getCookie(loginResponse);
-    }
-
-    private String loginAsNicoAndGetCookie() {
-        var loginResponse = loginAsNicoPost();
         return getCookie(loginResponse);
     }
 

@@ -64,6 +64,19 @@ public class MoviesControllerTest {
     }
 
     @Test
+    public void moviesInfoOk() {
+        var response = get(urlForTests() + "/movies/by/1,2,3,4");
+
+        response.then().body(MOVIE_NAME_KEY,
+                hasItems(CRASH_TEA_MOVIE_NAME,
+                        ROCK_IN_THE_SCHOOL_MOVIE_NAME,
+                        SMALL_FISH_MOVIE_NAME,
+                        RUNNING_FAR_AWAY_MOVIE_NAME));
+        response.then().body(JSON_ROOT, hasItem(hasKey(MOVIE_GENRES_KEY)));
+        response.then().body(JSON_ROOT, hasItem(hasKey(MOVIE_DURATION_KEY)));
+    }
+
+    @Test
     public void moviesSortedRateOk() {
         var response = get(urlForTests() + "/movies/sorted/rate");
         response.then().body("[0].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
@@ -85,6 +98,7 @@ public class MoviesControllerTest {
         response.then().body("[0].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         assertOnMovies(response);
     }
+
 
     private void assertOnMovies(Response response) {
         response.then().body(JSON_ROOT, hasItem(hasKey(MOVIE_GENRES_KEY)));

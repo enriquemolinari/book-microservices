@@ -1,11 +1,11 @@
 package model;
 
+import api.*;
 import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
-import api.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,7 +31,7 @@ public class Movies implements MoviesSubSystem {
     }
 
     @Override
-    public MovieInfo movie(Long id) {
+    public DetailedMovieInfo movie(Long id) {
         return new Tx(this.emf).inTx(em -> {
             try {
                 return movieWithActorsById(id, em);
@@ -41,49 +41,65 @@ public class Movies implements MoviesSubSystem {
         });
     }
 
-    private MovieInfo movieWithActorsById(Long id, EntityManager em) {
+    public void modifyMovieName(Long id, String newName) {
+        new Tx(this.emf).inTx(em -> {
+            var movien = movieBy(id, em);
+            movien.name(newName);
+            return null;
+        });
+    }
+
+
+    @Override
+    public List<MovieInfo> allMovieInfosBy(List<Long> ids) {
+        return new Tx(this.emf).inTx(em -> {
+            return em.createQuery("from Movie m "
+                            + "join fetch m.genres g "
+                            + "where m.id IN ?1 "
+                            + "order by m.name asc", Movie.class)
+                    .setHint("org.hibernate.cacheable", "true")
+                    .setParameter(1, ids).getResultList().stream()
+                    .map(Movie::toInfo).toList();
+        });
+    }
+
+    private DetailedMovieInfo movieWithActorsById(Long id, EntityManager em) {
         return em
                 .createQuery("from Movie m "
                         + "join fetch m.actors a "
                         + "join fetch m.actors.person "
                         + "where m.id = ?1 "
                         + "order by m.name asc", Movie.class)
-                .setParameter(1, id).getSingleResult().toInfo();
+                .setParameter(1, id).getSingleResult().toDetailedInfo();
     }
 
     @Override
-    public MovieInfo addNewMovie(String name, int duration,
-                                 LocalDate releaseDate, String plot, Set<Genre> genres) {
+    public DetailedMovieInfo addNewMovie(String name, int duration,
+                                         LocalDate releaseDate, String plot, Set<Genre> genres) {
         return new Tx(this.emf).inTx(em -> {
             var movie = new Movie(name, plot, duration, releaseDate, genres);
             em.persist(movie);
-            // TODO: PUBLISH
-//            this.publisher.notify(em, new NewMovieEvent(movie.id(),
-//                    movie.name(),
-//                    movie.duration(),
-//                    movie.releaseDate(),
-//                    movie.genreAsListOfString()));
-            return movie.toInfo();
+            return movie.toDetailedInfo();
         });
     }
 
     @Override
-    public MovieInfo addActorTo(Long movieId, String name, String surname,
-                                String email, String characterName) {
+    public DetailedMovieInfo addActorTo(Long movieId, String name, String surname,
+                                        String email, String characterName) {
         return new Tx(this.emf).inTx(em -> {
             var movie = em.getReference(Movie.class, movieId);
             movie.addAnActor(name, surname, email, characterName);
-            return movie.toInfo();
+            return movie.toDetailedInfo();
         });
     }
 
     @Override
-    public MovieInfo addDirectorToMovie(Long movieId, String name,
-                                        String surname, String email) {
+    public DetailedMovieInfo addDirectorToMovie(Long movieId, String name,
+                                                String surname, String email) {
         return new Tx(this.emf).inTx(em -> {
             var movie = em.getReference(Movie.class, movieId);
             movie.addADirector(name, surname, email);
-            return movie.toInfo();
+            return movie.toDetailedInfo();
         });
     }
 
@@ -147,8 +163,8 @@ public class Movies implements MoviesSubSystem {
     }
 
     @Override
-    public List<MovieInfo> pagedSearchMovieByName(String fullOrPartmovieName,
-                                                  int pageNumber) {
+    public List<DetailedMovieInfo> pagedSearchMovieByName(String fullOrPartmovieName,
+                                                          int pageNumber) {
         checkPageNumberIsGreaterThanZero(pageNumber);
         return new Tx(emf).inTx(em -> {
             var q = em.createQuery(
@@ -161,7 +177,7 @@ public class Movies implements MoviesSubSystem {
             q.setParameter(1, "%" + fullOrPartmovieName + "%");
             q.setFirstResult((pageNumber - 1) * this.pageSize);
             q.setMaxResults(this.pageSize);
-            return q.getResultList().stream().map(Movie::toInfo).toList();
+            return q.getResultList().stream().map(Movie::toDetailedInfo).toList();
         });
     }
 
@@ -172,18 +188,18 @@ public class Movies implements MoviesSubSystem {
     }
 
     @Override
-    public List<MovieInfo> pagedMoviesSortedByName(int pageNumber) {
+    public List<DetailedMovieInfo> pagedMoviesSortedByName(int pageNumber) {
         checkPageNumberIsGreaterThanZero(pageNumber);
         return pagedMoviesSortedBy(pageNumber, "order by m.name");
     }
 
     @Override
-    public List<MovieInfo> pagedMoviesSortedByReleaseDate(int pageNumber) {
+    public List<DetailedMovieInfo> pagedMoviesSortedByReleaseDate(int pageNumber) {
         return pagedMoviesSortedBy(pageNumber, "order by m.releaseDate desc");
     }
 
-    private List<MovieInfo> pagedMoviesSortedBy(int pageNumber,
-                                                String orderByClause) {
+    private List<DetailedMovieInfo> pagedMoviesSortedBy(int pageNumber,
+                                                        String orderByClause) {
         checkPageNumberIsGreaterThanZero(pageNumber);
         return new Tx(this.emf).inTx(em -> {
             var q = em.createQuery(
@@ -192,7 +208,7 @@ public class Movies implements MoviesSubSystem {
                     Movie.class);
             q.setFirstResult((pageNumber - 1) * this.pageSize);
             q.setMaxResults(this.pageSize);
-            return q.getResultList().stream().map(Movie::toInfo).toList();
+            return q.getResultList().stream().map(Movie::toDetailedInfo).toList();
         });
     }
 
@@ -204,7 +220,7 @@ public class Movies implements MoviesSubSystem {
     }
 
     @Override
-    public List<MovieInfo> pagedMoviesSortedByRate(int pageNumber) {
+    public List<DetailedMovieInfo> pagedMoviesSortedByRate(int pageNumber) {
         return pagedMoviesSortedBy(pageNumber,
                 "order by m.rating.totalUserVotes desc, m.rating.rateValue desc");
     }

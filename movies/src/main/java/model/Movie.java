@@ -1,9 +1,6 @@
 package model;
 
-import api.ActorInMovieName;
-import api.Genre;
-import api.MovieInfo;
-import api.MoviesException;
+import api.*;
 import common.FormattedDate;
 import common.NotBlankString;
 import jakarta.persistence.*;
@@ -137,10 +134,6 @@ public class Movie {
         return this.rating.hastTotalVotesOf(votes);
     }
 
-    String name() {
-        return this.name;
-    }
-    
     public void addAnActor(String name, String surname, String email,
                            String characterName) {
         this.actors.add(
@@ -151,8 +144,8 @@ public class Movie {
         this.directors.add(new Person(name, surname, email));
     }
 
-    public MovieInfo toInfo() {
-        return new MovieInfo(id, name,
+    public DetailedMovieInfo toDetailedInfo() {
+        return new DetailedMovieInfo(id, name,
                 new MovieDurationFormat(duration).toString(), plot,
                 genreAsListOfString(), directorsNamesAsString(),
                 new FormattedDate(releaseDate).toString(),
@@ -181,15 +174,13 @@ public class Movie {
                 + aString.substring(1).toLowerCase();
     }
 
-    int duration() {
-        return this.duration;
+    public MovieInfo toInfo() {
+        return new MovieInfo(id, name,
+                new MovieDurationFormat(duration).toString(),
+                genreAsListOfString());
     }
 
-    LocalDate releaseDate() {
-        return this.releaseDate;
-    }
-
-    long id() {
-        return this.id;
+    public void name(String newName) {
+        this.name = newName;
     }
 }

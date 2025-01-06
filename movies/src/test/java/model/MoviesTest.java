@@ -1,19 +1,15 @@
 package model;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import api.DetailedMovieInfo;
 import api.Genre;
 import api.MovieInfo;
 import api.MoviesException;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -23,20 +19,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MoviesTest {
 
-    private static final String JOSEUSER_SURNAME = "aSurname";
-    private static final String JOSEUSER_NAME = "Jose";
-    private static final String JOSEUSER_PASS = "password12345679";
-    private static final String JOSEUSER_EMAIL = "jose@bla.com";
-    private static final YearMonth JOSEUSER_CREDIT_CARD_EXPIRITY = YearMonth.of(
-            LocalDateTime.now().getYear(),
-            LocalDateTime.now().plusMonths(2).getMonth());
-    private static final String JOSEUSER_CREDIT_CARD_SEC_CODE = "145";
-    private static final String JOSEUSER_CREDIT_CARD_NUMBER = "123-456-789";
     private static final String JOSEUSER_USERNAME = "joseuser";
     private static final Long NON_EXISTENT_ID = -2L;
     private static final String ANTONIOUSER_USERNAME = "antonio";
+
     private final ForTests tests = new ForTests();
     private EntityManagerFactory emf;
+
+    private List<String> genresEnumSetToUpperCaseStrings(Set<Genre> comedyFantasyGenres) {
+        return comedyFantasyGenres.stream().map(s -> s.toString().toUpperCase())
+                .toList();
+    }
 
     private Movies createMoviesSubsystemWithPaging(int pageSize) {
         return new Movies(emf, pageSize);
@@ -60,18 +53,6 @@ public class MoviesTest {
                 "great movie");
         assertEquals(JOSEUSER_USERNAME, userRate.username());
         assertEquals(4, userRate.rateValue());
-    }
-
-    @Test
-    public void addNewMoviePublishEvent() {
-//        var publisher = new FakePublisher();
-        var movies = createMoviesSubsystem();
-        String movieName = "a movie name";
-        int duration = 100;
-        LocalDate releaseDate = LocalDate.of(2024, 12, 12);
-        String aPlot = "a plot";
-        var movieInfo = movies.addNewMovie(movieName, duration, releaseDate, aPlot, Set.of(Genre.CRIME));
-        //assertTrue(publisher.invokedWithEvent(new NewMovieEvent(movieInfo.id(), movieName, duration, releaseDate, movieInfo.genres())));
     }
 
     @Test
@@ -131,10 +112,10 @@ public class MoviesTest {
     public void retrieveMovie() {
         var movies = createMoviesSubsystem();
         var superMovie = tests.createSuperMovie(movies);
-        MovieInfo movie = movies.movie(superMovie.id());
+        DetailedMovieInfo movie = movies.movie(superMovie.id());
         assertEquals(2, movie.actors().size());
         assertEquals(1, movie.directorNames().size());
-        assertEquals(SUPER_MOVIE_DIRECTOR_NAME, movie.directorNames().get(0));
+        assertEquals(SUPER_MOVIE_DIRECTOR_NAME, movie.directorNames().getFirst());
         assertTrue(movie.actors()
                 .contains(SUPER_MOVIE_ACTOR_CARLOS));
         assertEquals(SUPER_MOVIE_NAME, movie.name());
@@ -148,7 +129,38 @@ public class MoviesTest {
         tests.createOtherSuperMovie(movies);
         var moviesList = movies.pagedMoviesSortedByReleaseDate(1);
         assertEquals(1, moviesList.size());
-        assertEquals(SUPER_MOVIE_NAME, moviesList.get(0).name());
+        assertEquals(SUPER_MOVIE_NAME, moviesList.getFirst().name());
+    }
+
+    @Test
+    public void retrieveAllMoviesInfo() {
+        var movies = createMoviesSubsystem();
+        var superMovie = tests.createSuperMovie(movies);
+        var otherSuperMovie = tests.createOtherSuperMovie(movies);
+        var otherMoreSuperMovie = tests.createOtherMoreSuperMovie(movies);
+        var allMoviesInfo = movies.allMovieInfosBy(
+                List.of(superMovie.id(), otherSuperMovie.id(), otherMoreSuperMovie.id()));
+        assertEquals(3, allMoviesInfo.size());
+        assertEquals(SUPER_MOVIE_NAME, allMoviesInfo.getFirst().name());
+        assertEquals(new MovieDurationFormat(SUPER_MOVIE_DURATION).toString()
+                , allMoviesInfo.get(0).duration());
+        assertTrue(genresEnumSetToUpperCaseStrings(ACTION_ADVENTURE_GENRES)
+                .containsAll(genresStringsSetToUpperCase(allMoviesInfo, 0)));
+        assertEquals(OTHER_SUPER_MOVIE_NAME, allMoviesInfo.get(1).name());
+        assertEquals(OTHER_MORE_SUPER_MOVIE_NAME, allMoviesInfo.get(2).name());
+        assertEquals(new MovieDurationFormat(OTHER_SUPER_MOVIE_DURATION).toString()
+                , allMoviesInfo.get(1).duration());
+        assertEquals(new MovieDurationFormat(OTHER_MORE_SUPER_MOVIE_DURATION).toString()
+                , allMoviesInfo.get(2).duration());
+        assertTrue(genresEnumSetToUpperCaseStrings(COMEDY_FANTASY_GENRES)
+                .containsAll(genresStringsSetToUpperCase(allMoviesInfo, 1)));
+        assertTrue(genresEnumSetToUpperCaseStrings(COMEDY_FANTASY_GENRES)
+                .containsAll(genresStringsSetToUpperCase(allMoviesInfo, 2)));
+    }
+
+    private List<String> genresStringsSetToUpperCase(List<MovieInfo> allMoviesInfo, int index) {
+        return allMoviesInfo.get(index).genres().stream().map(String::toUpperCase)
+                .toList();
     }
 
     @Test
@@ -158,14 +170,14 @@ public class MoviesTest {
         tests.createOtherSuperMovie(movies);
         var moviesList = movies.pagedMoviesSortedByName(1);
         assertEquals(1, moviesList.size());
-        assertEquals(SUPER_MOVIE_NAME, moviesList.get(0).name());
-        assertEquals(2, moviesList.get(0).genres().size());
-        assertEquals(2, moviesList.get(0).actors().size());
+        assertEquals(SUPER_MOVIE_NAME, moviesList.getFirst().name());
+        assertEquals(2, moviesList.getFirst().genres().size());
+        assertEquals(2, moviesList.getFirst().actors().size());
         var moviesList2 = movies.pagedMoviesSortedByName(2);
         assertEquals(1, moviesList2.size());
-        assertEquals(OTHER_SUPER_MOVIE_NAME, moviesList2.get(0).name());
-        assertEquals(2, moviesList2.get(0).genres().size());
-        assertEquals(1, moviesList2.get(0).actors().size());
+        assertEquals(OTHER_SUPER_MOVIE_NAME, moviesList2.getFirst().name());
+        assertEquals(2, moviesList2.getFirst().genres().size());
+        assertEquals(1, moviesList2.getFirst().actors().size());
     }
 
     @Test
@@ -175,7 +187,7 @@ public class MoviesTest {
         tests.createOtherSuperMovie(movies);
         var moviesList = movies.pagedSearchMovieByName("another", 1);
         assertEquals(1, moviesList.size());
-        assertEquals(OTHER_SUPER_MOVIE_NAME, moviesList.get(0).name());
+        assertEquals(OTHER_SUPER_MOVIE_NAME, moviesList.getFirst().name());
     }
 
     @Test
@@ -213,20 +225,4 @@ public class MoviesTest {
     public void tearDown() {
         emf.close();
     }
-
-//    public Publisher doNothingEventPubliser() {
-//        return new Publisher() {
-//            private final List<EventListener> subscribers = new ArrayList<>();
-//
-//            @Override
-//            public <E extends Event> void subscribe(EventListener<E> listener) {
-//                this.subscribers.add(listener);
-//            }
-//
-//            @Override
-//            public <E extends Event> void notify(EntityManager em, E event) {
-//
-//            }
-//        };
-//    }
 }

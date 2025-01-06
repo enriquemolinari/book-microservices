@@ -6,28 +6,30 @@ import java.util.Set;
 
 public interface MoviesSubSystem {
 
-    List<MovieInfo> pagedMoviesSortedByName(int pageNumber);
+    List<DetailedMovieInfo> pagedMoviesSortedByName(int pageNumber);
 
-    List<MovieInfo> pagedMoviesSortedByRate(int pageNumber);
+    List<DetailedMovieInfo> pagedMoviesSortedByRate(int pageNumber);
 
-    List<MovieInfo> pagedMoviesSortedByReleaseDate(int pageNumber);
+    List<DetailedMovieInfo> pagedMoviesSortedByReleaseDate(int pageNumber);
 
-    MovieInfo movie(Long id);
+    DetailedMovieInfo movie(Long id);
 
-    MovieInfo addNewMovie(String name, int duration,
-                          LocalDate releaseDate, String plot, Set<Genre> genres);
+    List<MovieInfo> allMovieInfosBy(List<Long> ids);
 
-    MovieInfo addActorTo(Long movieId, String name, String surname,
-                         String email, String characterName);
+    DetailedMovieInfo addNewMovie(String name, int duration,
+                                  LocalDate releaseDate, String plot, Set<Genre> genres);
 
-    MovieInfo addDirectorToMovie(Long movieId, String name,
-                                 String surname, String email);
+    DetailedMovieInfo addActorTo(Long movieId, String name, String surname,
+                                 String email, String characterName);
+
+    DetailedMovieInfo addDirectorToMovie(Long movieId, String name,
+                                         String surname, String email);
 
     UserMovieRate rateMovieBy(Long userId, Long idMovie, int rateValue,
                               String comment);
 
     List<UserMovieRate> pagedRatesOfOrderedDate(Long movieId, int pageNumber);
 
-    List<MovieInfo> pagedSearchMovieByName(String fullOrPartmovieName,
-                                           int pageNumber);
+    List<DetailedMovieInfo> pagedSearchMovieByName(String fullOrPartmovieName,
+                                                   int pageNumber);
 }

@@ -1,9 +1,6 @@
 package web;
 
-import api.MovieInfo;
-import api.MoviesAuthException;
-import api.MoviesSubSystem;
-import api.UserMovieRate;
+import api.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,18 +22,18 @@ public class MoviesController {
     }
 
     @GetMapping("/movies/{id}")
-    public ResponseEntity<MovieInfo> movieDetail(@PathVariable Long id) {
+    public ResponseEntity<DetailedMovieInfo> movieDetail(@PathVariable Long id) {
         return ResponseEntity.ok(moviesSubSystem.movie(id));
     }
 
     @GetMapping("/movies/sorted/rate")
-    public ResponseEntity<List<MovieInfo>> moviesSortedByRate(
+    public ResponseEntity<List<DetailedMovieInfo>> moviesSortedByRate(
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedMoviesSortedByRate(page));
     }
 
     @GetMapping("/movies/search/{fullOrPartialName}")
-    public ResponseEntity<List<MovieInfo>> moviesSearchBy(
+    public ResponseEntity<List<DetailedMovieInfo>> moviesSearchBy(
             @PathVariable String fullOrPartialName,
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity
@@ -44,15 +41,21 @@ public class MoviesController {
     }
 
     @GetMapping("/movies/sorted/releasedate")
-    public ResponseEntity<List<MovieInfo>> moviesSortedByReleaseDate(
+    public ResponseEntity<List<DetailedMovieInfo>> moviesSortedByReleaseDate(
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedMoviesSortedByReleaseDate(page));
     }
 
     @GetMapping("/movies")
-    public ResponseEntity<List<MovieInfo>> allMovies(
+    public ResponseEntity<List<DetailedMovieInfo>> allMovies(
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedMoviesSortedByName(page));
+    }
+
+    @GetMapping("/movies/by/{ids}")
+    public ResponseEntity<List<MovieInfo>> allMoviesInfo(
+            @PathVariable List<Long> ids) {
+        return ResponseEntity.ok(moviesSubSystem.allMovieInfosBy(ids));
     }
 
     @GetMapping("/movies/{id}/rate")

@@ -103,4 +103,8 @@ public class Movie {
     LocalDateTime releaseDateAsDateTime() {
         return this.releaseDate.atTime(0, 0);
     }
+
+    public Long id() {
+        return this.id;
+    }
 }

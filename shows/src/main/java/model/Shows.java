@@ -50,8 +50,12 @@ public class Shows implements ShowsSubSystem {
                                 + "order by m.name asc",
                         Movie.class).setParameter(1, LocalDateTime.now())
                 .setParameter(2, untilTo);
-        return query.getResultList().stream()
-                .map(Movie::toMovieShow)
+        List<Movie> movies = query.getResultList();
+        //get ids
+        //List<Long> movieIds = movies.stream().map(Movie::id).toList();
+        //call movies service ids and pass mapt to m.toMovieShow
+        return movies.stream()
+                .map(m -> m.toMovieShow())
                 .toList();
     }
 

@@ -31,8 +31,8 @@ public class MoviesHttpSyncCallProviderTest {
 
     static Stream<List<String>> nullAndEmptyList() {
         return Stream.of(
-                null,          // Valor null
-                List.of()      // Lista vacía
+                null,
+                List.of()
         );
     }
 
@@ -87,6 +87,19 @@ public class MoviesHttpSyncCallProviderTest {
         var provider = new MoviesHttpSyncCallProvider(VALID_MOVIES_URL);
         var e = assertThrows(ShowsException.class, () -> provider.moviesBy(ids));
         assertEquals(MoviesHttpSyncCallProvider.MOVIE_IDS_NOT_BE_EMPTY, e.getMessage());
+    }
+
+    @Test
+    public void callToAServiceNotStarted() {
+        var provider = new MoviesHttpSyncCallProvider("http://localhost:9999/movies/by/%s");
+        var map = provider.moviesBy(List.of(3L, 4L));
+        assertEquals(2, map.size());
+        assertEquals(NOT_AVAILABLE_MSG, map.get(4L).name());
+        assertEquals(NOT_AVAILABLE_MSG, map.get(3L).name());
+        assertEquals(NOT_AVAILABLE_MSG, map.get(4L).duration());
+        assertEquals(NOT_AVAILABLE_MSG, map.get(3L).duration());
+        assertEquals(Set.of(), map.get(4L).genres());
+        assertEquals(Set.of(), map.get(3L).genres());
     }
 
     @Test

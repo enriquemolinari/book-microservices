@@ -1,45 +1,38 @@
 package model;
 
 import common.DateTimeProvider;
+import org.mockserver.integration.ClientAndServer;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.Map;
 import java.util.Set;
+
+import static model.MoviesHttpSyncCallProviderTest.MOCK_SERVER_PORT;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 
 public class ForTests {
 
-    static final String SUPER_MOVIE_PLOT = "a super movie that shows the life of ...";
-    static final String SUPER_MOVIE_NAME = "a super movie";
-    static final String OTHER_SUPER_MOVIE_NAME = "another super movie";
-
-    Movie createSmallFishMovie() {
-        return createSmallFishMovie(LocalDate.of(2023, 10, 10));
-    }
-
     Buyer createUserNicolas() {
         return new Buyer(1L);
-    }
-
-    Movie createSmallFishMovie(LocalDate releaseDate) {
-        return new Movie(1L, "Small Fish", 102,
-                releaseDate,
-                Set.of("COMEDY", "ACTION")/* genre */);
     }
 
     PaymenentProviderFake fakePaymenentProvider() {
         return new PaymenentProviderFake();
     }
 
+    MovieInfoProvider doNothingMoviesProvider() {
+        return ids -> Map.of();
+    }
+
     PaymenentProviderThrowException fakePaymenentProviderThrowE() {
         return new PaymenentProviderThrowException();
     }
 
-    Long createSuperMovie(Shows shows) {
-        return shows.addNewMovie(1L, SUPER_MOVIE_NAME, 109,
-                LocalDate.of(2023, 4, 5),
-                Set.of("ACTION", "ADVENTURE"));
+    Long createAMovie(Shows shows, long id) {
+        return shows.addNewMovie(id);
     }
 
     CreditCardPaymentProvider doNothingPaymentProvider() {
@@ -47,11 +40,17 @@ public class ForTests {
         };
     }
 
-
     ShowTime createShowForSmallFish() {
-        return new ShowTime(DateTimeProvider.create(), createSmallFishMovie(),
+        return new ShowTime(DateTimeProvider.create(), new Movie(1L),
                 LocalDateTime.now().plusDays(1), 10f,
                 new Theater("a Theater", Set.of(1, 2, 3, 4, 5, 6)));
+    }
+
+    public ClientAndServer setUpMockServerExpectation(String jsonReponse) {
+        ClientAndServer mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT);
+        mockServer.when(request().withPath("/movies/by.*"))
+                .respond(response().withBody(jsonReponse));
+        return mockServer;
     }
 }
 

@@ -12,16 +12,16 @@ public class Ticket {
     private final int pointsWon;
     private final String salesDate;
     private final List<Integer> payedSeats;
-    private final String movieName;
+    private final Long movieId;
     private final String showStartTime;
 
     public Ticket(float total, int pointsWon,
-                  String formattedSalesDate, List<Integer> payedSeats, String movieName, String showStartTime) {
+                  String formattedSalesDate, List<Integer> payedSeats, Long movieId, String showStartTime) {
         this.total = total;
         this.pointsWon = pointsWon;
         this.salesDate = formattedSalesDate;
         this.payedSeats = payedSeats;
-        this.movieName = movieName;
+        this.movieId = movieId;
         this.showStartTime = showStartTime;
     }
 

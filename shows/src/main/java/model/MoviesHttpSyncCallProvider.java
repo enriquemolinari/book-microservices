@@ -29,19 +29,22 @@ public class MoviesHttpSyncCallProvider implements MovieInfoProvider {
     }
 
     @Override
-    public Map<Long, MovieInfo> movies(List<Long> ids) {
+    public Map<Long, MovieInfo> moviesBy(List<Long> ids) {
         checkMovieIdsNotEmpty(ids);
         try {
             var moviesUri = new URI(moviesEndpointUrl.formatted(toCommaSeparated(ids)));
             HttpRequest request = HttpRequest.newBuilder(moviesUri)
                     .timeout(Duration.ofSeconds(TIME_OUT_SECONDS))
                     .build();
-            var httpClient = HttpClient.newHttpClient();
-            HttpResponse<String> response = httpClient.send(request
-                    , HttpResponse.BodyHandlers.ofString());
-            return new MovieInfoJsonToMap(response.body()).convert();
+            HttpResponse<String> response;
+            try (var httpClient = HttpClient.newHttpClient()) {
+                response = httpClient.send(request
+                        , HttpResponse.BodyHandlers.ofString());
+                return new MovieInfoJsonToMap(response.body()).convert();
+            }
         } catch (Throwable e) {
-            //TODO: Alert operations
+            // It is crucial to raise a FATAL error in the frequently queried log stream here,
+            // ensuring that operations are promptly notified.
             return fallback(ids);
         }
     }
@@ -65,9 +68,8 @@ public class MoviesHttpSyncCallProvider implements MovieInfoProvider {
     }
 
     private String toCommaSeparated(List<Long> ids) {
-        return String.join(","
-                , ids.stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.toList()));
+        return ids.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
     }
 }

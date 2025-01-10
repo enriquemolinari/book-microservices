@@ -102,8 +102,8 @@ class ShowSeat {
         return new Seat(seatNumber, isAvailable());
     }
 
-    public String showMovieName() {
-        return this.show.movieName();
+    public Long showMovieId() {
+        return this.show.movieId();
     }
 
     public String showStartTime() {

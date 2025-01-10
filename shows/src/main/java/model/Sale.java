@@ -77,13 +77,13 @@ class Sale {
 
     private Ticket ticket() {
         ShowSeat first = this.seatsSold.stream().findFirst().get();
-        String movieName = first.showMovieName();
+        Long movieId = first.showMovieId();
         String startTime = first.showStartTime();
         return new Ticket(total,
                 pointsWon,
                 formattedSalesDate(),
                 confirmedSeatNumbers(),
-                movieName,
+                movieId,
                 startTime);
     }
 }

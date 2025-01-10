@@ -8,7 +8,6 @@ import model.Movie;
 import model.ShowTime;
 import model.Theater;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,8 +26,7 @@ public class SetUpSampleDb {
         try {
             tx.begin();
 
-            var schoolMovie = new Movie(1L, "Rock in the School", 109,
-                    LocalDate.now(), Set.of("COMEDY", "ACTION"));
+            var schoolMovie = new Movie(1L);
 
             var eu = new Buyer(1L);
             em.persist(eu);
@@ -43,9 +41,7 @@ public class SetUpSampleDb {
             em.persist(schoolMovie);
             em.flush();
 
-            var fishMovie = new Movie(2L, "Small Fish", 125,
-                    LocalDate.now().minusDays(1),
-                    Set.of("ADVENTURE", "DRAMA"));
+            var fishMovie = new Movie(2L);
 
             em.persist(fishMovie);
             em.flush();
@@ -54,12 +50,10 @@ public class SetUpSampleDb {
             em.persist(ju);
             em.flush();
 
-            var teaMovie = new Movie(3L, "Crash Tea", 105,
-                    LocalDate.now().minusDays(3), Set.of("COMEDY"));
+            var teaMovie = new Movie(3L);
             em.persist(teaMovie);
 
-            var runningMovie = new Movie(4L, "Running far Away",
-                    105, LocalDate.now(), Set.of("THRILLER", "ACTION"));
+            var runningMovie = new Movie(4L);
             em.persist(runningMovie);
 
             // Seats from Theatre A

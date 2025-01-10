@@ -3,6 +3,7 @@ package main;
 import api.ShowsSubSystem;
 import jakarta.persistence.Persistence;
 import model.CreditCardPaymentProvider;
+import model.MoviesHttpSyncCallProvider;
 import model.PersistenceUnit;
 import model.Shows;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,13 +17,13 @@ public class AppConfiguration {
     @Value("${movies.info.api.url}")
     private String moviesEndpoint;
 
-    //TODO: read from properties to pass to objects to consume movies endpoint
     @Bean
     public ShowsSubSystem createShows() {
         var emf = Persistence
                 .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS);
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
-        return new Shows(emf, doNothingPaymentProvider());
+        var moviesInfoProvider = new MoviesHttpSyncCallProvider(moviesEndpoint);
+        return new Shows(emf, doNothingPaymentProvider(), moviesInfoProvider);
     }
 
     private CreditCardPaymentProvider doNothingPaymentProvider() {

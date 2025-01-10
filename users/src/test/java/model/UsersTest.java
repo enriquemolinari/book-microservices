@@ -22,7 +22,6 @@ public class UsersTest {
     private final ForTests tests = new ForTests();
     private EntityManagerFactory emf;
 
-    //TODO: refactor test to use the builder
     @BeforeEach
     public void setUp() {
         emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_USERS_MS);

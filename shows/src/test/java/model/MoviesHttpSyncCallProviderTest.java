@@ -20,7 +20,8 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class MoviesHttpSyncCallProviderTest {
 
-    public static final String VALID_MOVIES_URL = "http://localhost:1080/movies/by/%s";
+    public static final int MOCK_SERVER_PORT = 1080;
+    public static final String VALID_MOVIES_URL = "http://localhost:" + MOCK_SERVER_PORT + "/movies/by/%s";
     private ClientAndServer mockServer;
 
     private static MoviesHttpSyncCallProvider buildMoviesProvider() {
@@ -37,7 +38,7 @@ public class MoviesHttpSyncCallProviderTest {
 
     @BeforeEach
     public void setUp() {
-        mockServer = ClientAndServer.startClientAndServer(1080);
+        mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT);
     }
 
     @AfterEach
@@ -49,7 +50,7 @@ public class MoviesHttpSyncCallProviderTest {
     public void syncCallTimesout() {
         mockServer.when(request().withPath("/movies/by/2,3"))
                 .respond(response().withDelay(TimeUnit.SECONDS, 3));
-        var map = buildMoviesProvider().movies(List.of(2L, 3L));
+        var map = buildMoviesProvider().moviesBy(List.of(2L, 3L));
         assertEquals(2, map.size());
         assertEquals(NOT_AVAILABLE_MSG, map.get(2L).name());
         assertEquals(NOT_AVAILABLE_MSG, map.get(3L).name());
@@ -84,7 +85,7 @@ public class MoviesHttpSyncCallProviderTest {
     @MethodSource("nullAndEmptyList")
     public void tryToSyncCallWithEmptyMovieIds(List<Long> ids) {
         var provider = new MoviesHttpSyncCallProvider(VALID_MOVIES_URL);
-        var e = assertThrows(ShowsException.class, () -> provider.movies(ids));
+        var e = assertThrows(ShowsException.class, () -> provider.moviesBy(ids));
         assertEquals(MoviesHttpSyncCallProvider.MOVIE_IDS_NOT_BE_EMPTY, e.getMessage());
     }
 
@@ -93,7 +94,7 @@ public class MoviesHttpSyncCallProviderTest {
         mockServer.when(request().withPath("/movies/by/1,2"))
                 .respond(response().withBody(jsonBodyValid()));
         var provider = buildMoviesProvider();
-        var map = provider.movies(List.of(1L, 2L));
+        var map = provider.moviesBy(List.of(1L, 2L));
         assertEquals(2, map.size());
         assertEquals("Crash Tea", map.get(3L).name());
         assertEquals("Small Fish", map.get(2L).name());

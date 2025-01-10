@@ -6,7 +6,6 @@ import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
@@ -21,18 +20,22 @@ public class Shows implements ShowsSubSystem {
     private final EntityManagerFactory emf;
     private final CreditCardPaymentProvider paymentGateway;
     private final DateTimeProvider dateTimeProvider;
+    private final MovieInfoProvider movieInfoProvider;
 
     public Shows(EntityManagerFactory emf,
                  CreditCardPaymentProvider paymentGateway,
+                 MovieInfoProvider movieInfoProvider,
                  DateTimeProvider provider) {
         this.emf = emf;
         this.paymentGateway = paymentGateway;
+        this.movieInfoProvider = movieInfoProvider;
         this.dateTimeProvider = provider;
     }
 
     public Shows(EntityManagerFactory emf,
-                 CreditCardPaymentProvider paymentGateway) {
-        this(emf, paymentGateway, DateTimeProvider.create());
+                 CreditCardPaymentProvider paymentGateway,
+                 MovieInfoProvider movieInfoProvider) {
+        this(emf, paymentGateway, movieInfoProvider, DateTimeProvider.create());
     }
 
     @Override
@@ -43,22 +46,17 @@ public class Shows implements ShowsSubSystem {
     }
 
     private List<MovieShows> movieShowsUntil(LocalDateTime untilTo, EntityManager em) {
-        var query = em.createQuery(
+        List<Movie> movies = em.createQuery(
                         "from Movie m "
                                 + "join fetch m.showTimes s join fetch s.screenedIn "
-                                + "where s.startTime >= ?1 and s.startTime <= ?2 "
-                                + "order by m.name asc",
+                                + "where s.startTime >= ?1 and s.startTime <= ?2 ",
                         Movie.class).setParameter(1, LocalDateTime.now())
-                .setParameter(2, untilTo);
-        List<Movie> movies = query.getResultList();
-        //get ids
-        //List<Long> movieIds = movies.stream().map(Movie::id).toList();
-        //call movies service ids and pass mapt to m.toMovieShow
+                .setParameter(2, untilTo).getResultList();
+        var movieInfoMap = this.movieInfoProvider.moviesBy(movieIds(movies));
         return movies.stream()
-                .map(m -> m.toMovieShow())
+                .map(m -> m.toMovieShow(movieInfoMap))
                 .toList();
     }
-
 
     @Override
     public Long addNewTheater(String name, Set<Integer> seatsNumbers) {
@@ -116,9 +114,10 @@ public class Shows implements ShowsSubSystem {
         });
     }
 
-    Long addNewMovie(Long id, String name, int duration, LocalDate releaseDate, Set<String> genres) {
+    // used for testing only
+    Long addNewMovie(Long id) {
         return new Tx(emf).inTx(em -> {
-            em.persist(new Movie(id, name, duration, releaseDate, genres));
+            em.persist(new Movie(id));
             return id;
         });
     }
@@ -160,5 +159,9 @@ public class Shows implements ShowsSubSystem {
             var show = showTimeBy(id, em);
             return show.toDetailedInfo();
         });
+    }
+
+    private List<Long> movieIds(List<Movie> movies) {
+        return movies.stream().map(Movie::id).toList();
     }
 }

@@ -2,10 +2,12 @@ package web;
 
 import io.restassured.response.Response;
 import main.Main;
+import model.ForTests;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -28,12 +30,14 @@ import static web.ShowsController.FW_GATEWAY_USER_ID;
 @ActiveProfiles(value = "test")
 public class ShowsControllerTest {
 
+    public static final int SMALL_FISH_MOVIE_ID = 2;
     private static final String INFO_KEY = "info";
     private static final String SEAT_AVAILABLE_KEY = "available";
     private static final String CURRENT_SEATS_KEY = "currentSeats";
     private static final String JSON_ROOT = "$";
     private static final String MOVIE_DURATION_KEY = "duration";
     private static final String SHOW_MOVIE_NAME_KEY = "movieName";
+    private static final String SHOW_MOVIE_ID_KEY = "movieId";
     private static final String ROCK_IN_THE_SCHOOL_MOVIE_NAME = "Rock in the School";
     private static final String RUNNING_FAR_AWAY_MOVIE_NAME = "Running far Away";
     private static final String SMALL_FISH_MOVIE_NAME = "Small Fish";
@@ -50,29 +54,72 @@ public class ShowsControllerTest {
 
     @Test
     public void playingNowShowsOk() {
-        var response = get(urlForTests() + "/shows");
+        try (ClientAndServer mock = new ForTests().setUpMockServerExpectation(jsonMovies()
+        )) {
+            var response = get(urlForTests() + "/shows");
 
-        response.then().body(SHOW_MOVIE_NAME_KEY,
-                hasItems(CRASH_TEA_MOVIE_NAME, SMALL_FISH_MOVIE_NAME,
-                        ROCK_IN_THE_SCHOOL_MOVIE_NAME,
-                        RUNNING_FAR_AWAY_MOVIE_NAME));
+            response.then().body(SHOW_MOVIE_NAME_KEY,
+                    hasItems(CRASH_TEA_MOVIE_NAME, SMALL_FISH_MOVIE_NAME,
+                            ROCK_IN_THE_SCHOOL_MOVIE_NAME,
+                            RUNNING_FAR_AWAY_MOVIE_NAME));
 
-        response.then().body(MOVIE_DURATION_KEY,
-                hasItems("1hr 49mins", "2hrs 05mins", "1hr 45mins",
-                        "1hr 45mins"));
+            response.then().body(MOVIE_DURATION_KEY,
+                    hasItems("1hr 49mins", "2hrs 05mins", "1hr 45mins",
+                            "1hr 50mins"));
+        }
+    }
+
+    private String jsonMovies() {
+        return """
+                [
+                    {
+                        "id": 1,
+                        "name": "Crash Tea",
+                        "duration": "1hr 49mins",
+                        "genres": [
+                            "genre1",
+                            "genre2"
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "name": "Rock in the School",
+                        "duration": "2hrs 05mins",
+                        "genres": [
+                            "genre1",
+                            "genre2"
+                        ]
+                    },
+                    {
+                        "id": 3,
+                        "name": "Small Fish",
+                        "duration": "1hr 45mins",
+                        "genres": [
+                            "genre1",
+                            "genre2"
+                        ]
+                    },
+                    {
+                        "id": 4,
+                        "name": "Running far Away",
+                        "duration": "1hr 50mins",
+                        "genres": [
+                            "genre1",
+                            "genre2"
+                        ]
+                    }
+                ]
+                """;
     }
 
     @Test
     public void showOneOk() {
         var response = get(urlForTests() + "/shows/1");
-        // To avoid fragile tests, I use oneOf, as the movie assigned to show 1
-        // might change
-        response.then().body("info." + SHOW_MOVIE_NAME_KEY,
-                is(oneOf(SMALL_FISH_MOVIE_NAME, ROCK_IN_THE_SCHOOL_MOVIE_NAME,
-                        RUNNING_FAR_AWAY_MOVIE_NAME, CRASH_TEA_MOVIE_NAME)));
+        response.then().body("info." + SHOW_MOVIE_ID_KEY, is(SMALL_FISH_MOVIE_ID));
         response.then().body("info.showId", is(1));
         response.then().body(JSON_ROOT, hasKey(CURRENT_SEATS_KEY));
-        response.then().body(INFO_KEY, hasKey("movieDuration"));
+        response.then().body(INFO_KEY, hasKey("playingTime"));
+        response.then().body(INFO_KEY, hasKey("price"));
     }
 
     @Test
@@ -99,7 +146,7 @@ public class ShowsControllerTest {
 
     @Test
     public void payAShowFailIfNotAuthenticated() throws JSONException {
-        JSONArray seatsRequest = jsonBodyForReserveSeats(2, 3, 7);
+        JSONArray seatsRequest = jsonBodyForReserveSeats(SMALL_FISH_MOVIE_ID, 3, 7);
 
         JSONObject paymentRequest = paymentRequestForSeats(seatsRequest);
 
@@ -113,7 +160,7 @@ public class ShowsControllerTest {
 
     @Test
     public void payNotReservedSeatsFail() throws JSONException {
-        JSONArray seatsRequest = jsonBodyForReserveSeats(2, 3, 7);
+        JSONArray seatsRequest = jsonBodyForReserveSeats(SMALL_FISH_MOVIE_ID, 3, 7);
 
         JSONObject paymentRequest = paymentRequestForSeats(seatsRequest);
 
@@ -132,9 +179,7 @@ public class ShowsControllerTest {
 
         var response = payShowOneForUserTwoPost(paymentRequest);
 
-        response.then().body(SHOW_MOVIE_NAME_KEY,
-                is(oneOf(SMALL_FISH_MOVIE_NAME, ROCK_IN_THE_SCHOOL_MOVIE_NAME,
-                        RUNNING_FAR_AWAY_MOVIE_NAME, CRASH_TEA_MOVIE_NAME)));
+        response.then().body(SHOW_MOVIE_ID_KEY, is(SMALL_FISH_MOVIE_ID));
         response.then().body("total", is(30.0F));
         response.then().body("pointsWon", is(10));
         response.then().body("payedSeats", hasItems(12, 13, 17));
@@ -166,21 +211,21 @@ public class ShowsControllerTest {
                 .filter(l -> l.get(SEAT_AVAILABLE_KEY).equals(true))
                 .toList();
 
-        assertEquals(2, notAvailableSeats.size());
+        assertEquals(SMALL_FISH_MOVIE_ID, notAvailableSeats.size());
         assertEquals(28, availableSeats.size());
 
-        response.then().body(INFO_KEY + "." + SHOW_MOVIE_NAME_KEY,
-                is(oneOf(SMALL_FISH_MOVIE_NAME, ROCK_IN_THE_SCHOOL_MOVIE_NAME,
-                        RUNNING_FAR_AWAY_MOVIE_NAME, CRASH_TEA_MOVIE_NAME)));
+        response.then().body(INFO_KEY + "." + SHOW_MOVIE_ID_KEY, is(SMALL_FISH_MOVIE_ID));
         response.then().body("info.showId", is(2));
         response.then().body(JSON_ROOT, hasKey(CURRENT_SEATS_KEY));
-        response.then().body(INFO_KEY, hasKey("movieDuration"));
+        response.then().body(JSON_ROOT, hasKey("theater"));
+        response.then().body(INFO_KEY, hasKey("playingTime"));
+        response.then().body(INFO_KEY, hasKey("price"));
     }
 
     private Response reserveSeatsTwoFourFromShowTwoPost() {
-        JSONArray seatsRequest = jsonBodyForReserveSeats(2, 4);
+        JSONArray seatsRequest = jsonBodyForReserveSeats(SMALL_FISH_MOVIE_ID, 4);
 
-        return reservePost("1", seatsRequest, 2);
+        return reservePost("1", seatsRequest, SMALL_FISH_MOVIE_ID);
     }
 
     private Response payShowOneForUserTwoPost(JSONObject paymentRequest) {

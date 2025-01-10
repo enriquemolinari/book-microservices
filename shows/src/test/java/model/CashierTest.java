@@ -39,7 +39,7 @@ public class CashierTest {
                         expirationDate,
                         "123456"));
         assertEquals(20f, ticket.total());
-        assertEquals("Small Fish", ticket.getMovieName());
+        assertEquals(1L, ticket.getMovieId());
         assertEquals(10, ticket.getPointsWon());
         assertTrue(ticket.hasSeats(seatsForCarlos));
         assertTrue(paymentProvider.hasBeanCalledWith("789456",
@@ -51,13 +51,13 @@ public class CashierTest {
     @Test
     public void payWithoutSeatsCannotBeCompleted() {
         Exception e = assertThrows(ShowsException.class, () -> {
-            var ticket = new Cashier(tests.fakePaymenentProvider())
+            new Cashier(tests.fakePaymenentProvider())
                     .paySeatsFor(Set.of(), aShow, carlos,
                             CreditCard.of("789456",
                                     getExpirationDate(),
                                     "123456"));
         });
-        assertEquals(e.getMessage(), Cashier.SELECTED_SEATS_SHOULD_NOT_BE_EMPTY);
+        assertEquals(Cashier.SELECTED_SEATS_SHOULD_NOT_BE_EMPTY, e.getMessage());
     }
 
     private void reserveSeatsForCarlos(Set<Integer> seatsForCarlos) {
@@ -76,7 +76,7 @@ public class CashierTest {
                             expirationDate,
                             "123456"));
         });
-        assertEquals(e.getMessage(), Cashier.CREDIT_CARD_DEBIT_HAS_FAILED);
+        assertEquals(Cashier.CREDIT_CARD_DEBIT_HAS_FAILED, e.getMessage());
         assertTrue(aShow.noneOfTheSeatsAreConfirmedBy(carlos, seatsForCarlos));
     }
 }

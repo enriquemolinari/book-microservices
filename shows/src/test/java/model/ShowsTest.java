@@ -1,5 +1,6 @@
 package model;
 
+import api.MovieShows;
 import api.Seat;
 import api.ShowsException;
 import api.ShowsSubSystem;
@@ -9,13 +10,14 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Set;
 
-import static model.ForTests.SUPER_MOVIE_NAME;
+import static model.MoviesHttpSyncCallProviderTest.VALID_MOVIES_URL;
 import static model.PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +39,7 @@ public class ShowsTest {
     @Test
     public void reservationHasExpired() {
         var shows = createShowsSubSystem(() -> LocalDateTime.now().minusMinutes(50));
-        var movieId = tests.createSuperMovie(shows);
+        var movieId = tests.createAMovie(shows, 1L);
         var theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
                 LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
@@ -57,7 +59,7 @@ public class ShowsTest {
     @Test
     public void iCanReserveAnExpiredReservation() {
         var shows = createShowsSubSystem(() -> LocalDateTime.now().minusMinutes(50));
-        var movieId = tests.createSuperMovie(shows);
+        var movieId = tests.createAMovie(shows, 1L);
         var theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
                 LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
@@ -77,34 +79,72 @@ public class ShowsTest {
     }
 
     @Test
+    public void showsPlayingAt() {
+        try (ClientAndServer mockServer = tests.setUpMockServerExpectation(jsonTwoMovies())) {
+            var shows = createShowsSubSystemMockedMoviesProvider(DateTimeProvider.create());
+            tests.createAMovie(shows, 1L);
+            tests.createAMovie(shows, 2L);
+            long theaterId = createATheater(shows);
+            shows.addNewShowFor(1L,
+                    LocalDateTime.now().plusDays(2),
+                    15f, theaterId, 20);
+            shows.addNewShowFor(1L,
+                    LocalDateTime.now().plusDays(1), 16f, theaterId, 20);
+            shows.addNewShowFor(2L,
+                    LocalDateTime.now().plusDays(4), 30f, theaterId, 30);
+            var movieShows = shows
+                    .showsUntil(
+                            LocalDateTime.of(LocalDate.now().plusDays(5).getYear(),
+                                    10, 10, 13, 31));
+            assertEquals(2, movieShows.size());
+            MovieShows movieOne = movieShows.stream().filter(m -> m.movieId().equals(1L)).toList().getFirst();
+            MovieShows movieTwo = movieShows.stream().filter(m -> m.movieId().equals(2L)).toList().getFirst();
+            assertEquals(2, movieOne.shows().size());
+            assertEquals(1, movieTwo.shows().size());
+            assertEquals("super movie name", movieOne.movieName());
+            assertEquals("other movie name", movieTwo.movieName());
+            assertEquals("2hrs 05mins", movieOne.duration());
+            assertEquals("3hrs 15mins", movieTwo.duration());
+            assertEquals(2, movieOne.genres().size());
+            assertEquals(1, movieTwo.genres().size());
+            assertEquals(15f, movieOne.shows().stream().filter(s -> s.showId().equals(1L)).toList().getFirst().price());
+            assertEquals(16f, movieOne.shows().stream().filter(s -> s.showId().equals(2L)).toList().getFirst().price());
+            assertEquals(30f, movieTwo.shows().getFirst().price());
+        }
+    }
+
+    @Test
     public void aShowIsPlayingAt() {
-        var shows = createShowsSubSystem(DateTimeProvider.create());
-        var movieId = tests.createSuperMovie(shows);
-        long theaterId = createATheater(shows);
-        shows.addNewShowFor(movieId,
-                LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
-                        13, 30),
-                10f, theaterId, 20);
-        shows.addNewShowFor(movieId,
-                LocalDateTime.of(LocalDate.now().plusYears(2).getYear(),
-                        5, 10,
-                        13, 30),
-                10f, theaterId, 20);
-        var movieShows = shows
-                .showsUntil(
-                        LocalDateTime.of(LocalDate.now().plusYears(1).getYear(),
-                                10, 10, 13, 31));
-        assertEquals(1, movieShows.size());
-        assertEquals("1hr 49mins", movieShows.get(0).duration());
-        assertEquals(1, movieShows.get(0).shows().size());
-        assertEquals(10f, movieShows.get(0).shows().get(0).price());
-        assertEquals(SUPER_MOVIE_NAME, movieShows.get(0).movieName());
+        try (ClientAndServer mockServer = tests.setUpMockServerExpectation(jsonOneMovie())) {
+            var shows = createShowsSubSystemMockedMoviesProvider(DateTimeProvider.create());
+            var movieId = tests.createAMovie(shows, 1L);
+            long theaterId = createATheater(shows);
+            shows.addNewShowFor(movieId,
+                    LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
+                            13, 30),
+                    10f, theaterId, 20);
+            shows.addNewShowFor(movieId,
+                    LocalDateTime.of(LocalDate.now().plusYears(2).getYear(),
+                            5, 10,
+                            13, 30),
+                    10f, theaterId, 20);
+            var movieShows = shows
+                    .showsUntil(
+                            LocalDateTime.of(LocalDate.now().plusYears(1).getYear(),
+                                    10, 10, 13, 31));
+            assertEquals(1, movieShows.size());
+            assertEquals("2hrs 05mins", movieShows.getFirst().duration());
+            assertEquals(1, movieShows.getFirst().shows().size());
+            assertEquals(10f, movieShows.getFirst().shows().getFirst().price());
+            assertEquals("A movie name", movieShows.getFirst().movieName());
+            assertEquals(Set.of("genre1", "genre2"), movieShows.getFirst().genres());
+        }
     }
 
     @Test
     public void reserveSeats() {
         var shows = createShowsSubSystem(DateTimeProvider.create());
-        var movieId = tests.createSuperMovie(shows);
+        var movieId = tests.createAMovie(shows, 1L);
         long theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
                 LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
@@ -122,7 +162,7 @@ public class ShowsTest {
     @Test
     public void retrieveShow() {
         var shows = createShowsSubSystem(DateTimeProvider.create());
-        var movieId = tests.createSuperMovie(shows);
+        var movieId = tests.createAMovie(shows, 1L);
         long theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
                 LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
@@ -131,8 +171,6 @@ public class ShowsTest {
         var userId = registerAUser(shows);
         shows.reserve(userId, showInfo.showId(), Set.of(1, 5));
         var info = shows.show(showInfo.showId());
-        assertEquals(SUPER_MOVIE_NAME, info.info().movieName());
-        assertEquals("1hr 49mins", info.info().movieDuration());
         assertTrue(info.currentSeats().contains(new Seat(1, false)));
         assertTrue(info.currentSeats().contains(new Seat(2, true)));
         assertTrue(info.currentSeats().contains(new Seat(3, true)));
@@ -143,7 +181,7 @@ public class ShowsTest {
     @Test
     public void reserveAlreadReservedSeats() {
         var shows = createShowsSubSystem(DateTimeProvider.create());
-        var movieId = tests.createSuperMovie(shows);
+        var movieId = tests.createAMovie(shows, 1L);
         long theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
                 LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
@@ -162,8 +200,8 @@ public class ShowsTest {
     @Test
     public void confirmAndPaySeats() {
         var fakePaymenentProvider = tests.fakePaymenentProvider();
-        var shows = new Shows(emf, fakePaymenentProvider);
-        var movieId = tests.createSuperMovie(shows);
+        var shows = new Shows(emf, fakePaymenentProvider, tests.doNothingMoviesProvider());
+        var movieId = tests.createAMovie(shows, 1L);
         long theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
                 LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
@@ -208,7 +246,7 @@ public class ShowsTest {
     @Test
     public void theaterIdNotExists() {
         var shows = createShowsSubSystem(DateTimeProvider.create());
-        var movieId = tests.createSuperMovie(shows);
+        var movieId = tests.createAMovie(shows, 1L);
         var e = assertThrows(ShowsException.class, () -> {
             shows.addNewShowFor(movieId, LocalDateTime.now().plusDays(1), 10f, NON_EXISTENT_ID, 10);
             fail("ShowId should not exists in the database");
@@ -216,9 +254,17 @@ public class ShowsTest {
         assertEquals(Shows.THEATER_ID_DOES_NOT_EXISTS, e.getMessage());
     }
 
+    private Shows createShowsSubSystemMockedMoviesProvider(DateTimeProvider dateTimeProvider) {
+        return new Shows(emf,
+                tests.doNothingPaymentProvider(),
+                new MoviesHttpSyncCallProvider(VALID_MOVIES_URL),
+                dateTimeProvider);
+    }
+
     private Shows createShowsSubSystem(DateTimeProvider dateTimeProvider) {
         return new Shows(emf,
                 tests.doNothingPaymentProvider(),
+                tests.doNothingMoviesProvider(),
                 dateTimeProvider);
     }
 
@@ -238,6 +284,46 @@ public class ShowsTest {
     @AfterEach
     public void tearDown() {
         emf.close();
+    }
+
+    private String jsonOneMovie() {
+        return """
+                [
+                    {
+                        "id": 1,
+                        "name": "A movie name",
+                        "duration": "2hrs 05mins",
+                        "genres": [
+                            "genre1",
+                            "genre2"
+                        ]
+                    }
+                ]
+                """;
+    }
+
+    private String jsonTwoMovies() {
+        return """
+                [
+                    {
+                        "id": 1,
+                        "name": "super movie name",
+                        "duration": "2hrs 05mins",
+                        "genres": [
+                            "genre1",
+                            "genre2"
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "name": "other movie name",
+                        "duration": "3hrs 15mins",
+                        "genres": [
+                            "genre3"
+                        ]
+                    }
+                ]
+                """;
     }
 
 }

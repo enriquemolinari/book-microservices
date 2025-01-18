@@ -1,4 +1,4 @@
-package api.gateway.filters;
+package api.gateway.filters.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -56,7 +56,9 @@ class TokenVerificationFilter extends AbstractGatewayFilterFactory<TokenVerifica
         };
     }
 
-    private Mono<Void> forwardIfTokenOkRespondFailureIfNotValid(ServerWebExchange exchange, GatewayFilterChain chain, Optional<String> possiblyAToken) {
+    private Mono<Void> forwardIfTokenOkRespondFailureIfNotValid(ServerWebExchange exchange,
+                                                                GatewayFilterChain chain,
+                                                                Optional<String> possiblyAToken) {
         return possiblyAToken.map(token -> {
             var result = tokenVerification.verify(token);
             if (HttpStatusCode.OK.equals(result.statusCode())) {

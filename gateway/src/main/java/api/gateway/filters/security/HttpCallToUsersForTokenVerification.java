@@ -1,4 +1,4 @@
-package api.gateway.filters;
+package api.gateway.filters.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -13,12 +13,14 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+import static java.net.http.HttpClient.newHttpClient;
+
 @Component
 @Primary
 class HttpCallToUsersForTokenVerification implements TokenVerification {
     private final int timeoutInSeconds;
-    private String usersServerPort;
-    private String usersUriTokenVerificationPath;
+    private final String usersServerPort;
+    private final String usersUriTokenVerificationPath;
 
     public HttpCallToUsersForTokenVerification(@Value("${users.serverPort}") String usersServerPort,
                                                @Value("${users.uriTokenVerificationPath}") String usersUriTokenVerificationPath,
@@ -38,14 +40,15 @@ class HttpCallToUsersForTokenVerification implements TokenVerification {
             }
             return TokenVerificationResult.failure(response.statusCode(), response.body());
         } catch (URISyntaxException | IOException | InterruptedException e) {
-            e.printStackTrace();
             return TokenVerificationResult.failure(HttpStatusCode.INTERNAL_SERVER_ERROR.code(), e.getMessage());
         }
     }
 
     private HttpResponse<String> performRequest(HttpRequest req) throws IOException, InterruptedException {
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response;
+        try (HttpClient httpClient = newHttpClient()) {
+            response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        }
         return response;
     }
 

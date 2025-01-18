@@ -14,7 +14,6 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest(classes = ApiGatewayApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-// Note: This test requires all services up and running
 @ActiveProfiles(value = "test")
 public class ApiGatewayIntegrationTest {
     public static final String METHOD_POST = "POST";

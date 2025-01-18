@@ -1,4 +1,4 @@
-package api.gateway.filters;
+package api.gateway.filters.security;
 
 enum HttpStatusCode {
     OK(200),

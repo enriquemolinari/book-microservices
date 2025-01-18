@@ -1,4 +1,4 @@
-package api.gateway.filters;
+package api.gateway.filters.security;
 
 record TokenVerificationResult(HttpStatusCode statusCode, String errorMsg,
                                String userId) {

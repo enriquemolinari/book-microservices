@@ -1,16 +1,10 @@
 package model;
 
 import common.DateTimeProvider;
-import org.mockserver.integration.ClientAndServer;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.Map;
 import java.util.Set;
-
-import static model.MoviesHttpSyncCallProviderTest.MOCK_SERVER_PORT;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 
 public class ForTests {
@@ -21,10 +15,6 @@ public class ForTests {
 
     PaymenentProviderFake fakePaymenentProvider() {
         return new PaymenentProviderFake();
-    }
-
-    MovieInfoProvider doNothingMoviesProvider() {
-        return ids -> Map.of();
     }
 
     PaymenentProviderThrowException fakePaymenentProviderThrowE() {
@@ -44,13 +34,6 @@ public class ForTests {
         return new ShowTime(DateTimeProvider.create(), new Movie(1L),
                 LocalDateTime.now().plusDays(1), 10f,
                 new Theater("a Theater", Set.of(1, 2, 3, 4, 5, 6)));
-    }
-
-    public ClientAndServer setUpMockServerExpectation(String jsonReponse) {
-        ClientAndServer mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT);
-        mockServer.when(request().withPath("/movies/by.*"))
-                .respond(response().withBody(jsonReponse));
-        return mockServer;
     }
 }
 

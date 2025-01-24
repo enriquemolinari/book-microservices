@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 
 import static model.Schema.DATABASE_SCHEMA_NAME;
 import static model.Schema.MOVIE_ID_COLUMN_NAME;
@@ -28,11 +27,9 @@ public class Movie {
     public Movie(long id) {
         this.id = id;
     }
-    
-    public MovieShows toMovieShow(Map<Long, MovieInfo> movies) {
-        return new MovieShows(this.id, movies.get(this.id).name(),
-                movies.get(this.id).duration(),
-                movies.get(this.id).genres(),
+
+    public MovieShows toMovieShow() {
+        return new MovieShows(this.id,
                 this.showTimes.stream()
                         .map(ShowTime::toShowInfo).toList());
     }

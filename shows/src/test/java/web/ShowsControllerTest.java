@@ -2,12 +2,10 @@ package web;
 
 import io.restassured.response.Response;
 import main.Main;
-import model.ForTests;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.mockserver.integration.ClientAndServer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -35,13 +33,7 @@ public class ShowsControllerTest {
     private static final String SEAT_AVAILABLE_KEY = "available";
     private static final String CURRENT_SEATS_KEY = "currentSeats";
     private static final String JSON_ROOT = "$";
-    private static final String MOVIE_DURATION_KEY = "duration";
-    private static final String SHOW_MOVIE_NAME_KEY = "movieName";
     private static final String SHOW_MOVIE_ID_KEY = "movieId";
-    private static final String ROCK_IN_THE_SCHOOL_MOVIE_NAME = "Rock in the School";
-    private static final String RUNNING_FAR_AWAY_MOVIE_NAME = "Running far Away";
-    private static final String SMALL_FISH_MOVIE_NAME = "Small Fish";
-    private static final String CRASH_TEA_MOVIE_NAME = "Crash Tea";
     private static final String ERROR_MESSAGE_KEY = "message";
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String HOST = "http://localhost";
@@ -54,62 +46,15 @@ public class ShowsControllerTest {
 
     @Test
     public void playingNowShowsOk() {
-        try (ClientAndServer mock = new ForTests().setUpMockServerExpectation(jsonMovies()
-        )) {
-            var response = get(urlForTests() + "/shows");
-
-            response.then().body(SHOW_MOVIE_NAME_KEY,
-                    hasItems(CRASH_TEA_MOVIE_NAME, SMALL_FISH_MOVIE_NAME,
-                            ROCK_IN_THE_SCHOOL_MOVIE_NAME,
-                            RUNNING_FAR_AWAY_MOVIE_NAME));
-
-            response.then().body(MOVIE_DURATION_KEY,
-                    hasItems("1hr 49mins", "2hrs 05mins", "1hr 45mins",
-                            "1hr 50mins"));
-        }
-    }
-
-    private String jsonMovies() {
-        return """
-                [
-                    {
-                        "id": 1,
-                        "name": "Crash Tea",
-                        "duration": "1hr 49mins",
-                        "genres": [
-                            "genre1",
-                            "genre2"
-                        ]
-                    },
-                    {
-                        "id": 2,
-                        "name": "Rock in the School",
-                        "duration": "2hrs 05mins",
-                        "genres": [
-                            "genre1",
-                            "genre2"
-                        ]
-                    },
-                    {
-                        "id": 3,
-                        "name": "Small Fish",
-                        "duration": "1hr 45mins",
-                        "genres": [
-                            "genre1",
-                            "genre2"
-                        ]
-                    },
-                    {
-                        "id": 4,
-                        "name": "Running far Away",
-                        "duration": "1hr 50mins",
-                        "genres": [
-                            "genre1",
-                            "genre2"
-                        ]
-                    }
-                ]
-                """;
+        var response = get(urlForTests() + "/shows");
+        response.then().statusCode(200).body(SHOW_MOVIE_ID_KEY,
+                hasItems(1, 2, 3, 4));
+        response.then().body("find { it.movieId == 1 }.shows", hasSize(2));
+        response.then().body("find { it.movieId == 2 }.shows", hasSize(2));
+        response.then().body("find { it.movieId == 3 }.shows", hasSize(1));
+        response.then().body("find { it.movieId == 4 }.shows", hasSize(1));
+        response.then().body("find { it.movieId == 1 }.shows.find { it.showId == 3 }.price", equalTo(19.0f));
+        response.then().body("find { it.movieId == 2 }.shows.find { it.showId == 1 }.price", equalTo(10.0f));
     }
 
     @Test

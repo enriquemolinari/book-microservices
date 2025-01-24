@@ -3,6 +3,7 @@ server:
     host: http://localhost
   port: 8080
 port:
+  composer: 8090
   movies: 8091
   shows: 8092
   users: 8093

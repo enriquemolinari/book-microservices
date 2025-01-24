@@ -28,6 +28,10 @@ spring:
             - Path=/shows/private/**
           filters:
             - TokenVerificationFilter
+        - id: shows_composed
+          uri: ${server.ms.host}:${port.composer}
+          predicates:
+            - Path=/composed/shows/**
         - id: shows_public
           uri: ${server.ms.host}:${port.shows}
           predicates:

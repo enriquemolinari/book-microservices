@@ -3,7 +3,6 @@ package main;
 import api.ShowsSubSystem;
 import jakarta.persistence.Persistence;
 import model.CreditCardPaymentProvider;
-import model.MoviesHttpSyncCallProvider;
 import model.PersistenceUnit;
 import model.Shows;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +21,7 @@ public class AppConfiguration {
         var emf = Persistence
                 .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS);
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
-        var moviesInfoProvider = new MoviesHttpSyncCallProvider(moviesEndpoint);
-        return new Shows(emf, doNothingPaymentProvider(), moviesInfoProvider);
+        return new Shows(emf, doNothingPaymentProvider());
     }
 
     private CreditCardPaymentProvider doNothingPaymentProvider() {

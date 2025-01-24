@@ -20,22 +20,18 @@ public class Shows implements ShowsSubSystem {
     private final EntityManagerFactory emf;
     private final CreditCardPaymentProvider paymentGateway;
     private final DateTimeProvider dateTimeProvider;
-    private final MovieInfoProvider movieInfoProvider;
 
     public Shows(EntityManagerFactory emf,
                  CreditCardPaymentProvider paymentGateway,
-                 MovieInfoProvider movieInfoProvider,
                  DateTimeProvider provider) {
         this.emf = emf;
         this.paymentGateway = paymentGateway;
-        this.movieInfoProvider = movieInfoProvider;
         this.dateTimeProvider = provider;
     }
 
     public Shows(EntityManagerFactory emf,
-                 CreditCardPaymentProvider paymentGateway,
-                 MovieInfoProvider movieInfoProvider) {
-        this(emf, paymentGateway, movieInfoProvider, DateTimeProvider.create());
+                 CreditCardPaymentProvider paymentGateway) {
+        this(emf, paymentGateway, DateTimeProvider.create());
     }
 
     @Override
@@ -52,9 +48,8 @@ public class Shows implements ShowsSubSystem {
                                 + "where s.startTime >= ?1 and s.startTime <= ?2 ",
                         Movie.class).setParameter(1, LocalDateTime.now())
                 .setParameter(2, untilTo).getResultList();
-        var movieInfoMap = this.movieInfoProvider.moviesBy(movieIds(movies));
         return movies.stream()
-                .map(m -> m.toMovieShow(movieInfoMap))
+                .map(m -> m.toMovieShow())
                 .toList();
     }
 
@@ -159,9 +154,5 @@ public class Shows implements ShowsSubSystem {
             var show = showTimeBy(id, em);
             return show.toDetailedInfo();
         });
-    }
-
-    private List<Long> movieIds(List<Movie> movies) {
-        return movies.stream().map(Movie::id).toList();
     }
 }

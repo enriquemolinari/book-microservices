@@ -31,12 +31,6 @@ public class SetUpSampleDb {
             var nervan = new Person("Nervan", "Allister",
                     "nervan@mymovies.com");
             var ernest = new Person("Ernest", "Finey", "ernest@mymovies.com");
-            var enrique = new Person("Enrique", "Molinari",
-                    "enrique.molinari@gmail.com");
-            var josefina = new Person("Josefina", "Simini",
-                    "jsimini@mymovies.com");
-            var lucia = new Person("Lucia", "Molimini", "lu@mymovies.com");
-            var nico = new Person("Nicolas", "Molimini", "nico@mymovies.com");
             var camilo = new Person("Camilo", "Fernandez", "cami@mymovies.com");
             var franco = new Person("Franco", "Elchow", "franco@mymovies.com");
             var michael = new Person("Michael", "Martinez",
@@ -67,11 +61,11 @@ public class SetUpSampleDb {
                             + "to elementary school kids",
                     109, LocalDate.now(), Set.of(Genre.COMEDY, Genre.ACTION),
                     List.of(jakeActor, joshActor), List.of(colinDirector));
-            var eu = new User(1L, "emolinari");
+            var eu = new User(1L);
             em.persist(eu);
 
-            var nu = new User(2L, "nico");
-            var lu = new User(3L, "lucia");
+            var nu = new User(2L);
+            var lu = new User(3L);
 
             em.persist(nu);
             em.persist(lu);
@@ -94,7 +88,7 @@ public class SetUpSampleDb {
 
             em.persist(fishMovie);
 
-            var ju = new User(4L, "jsimini");
+            var ju = new User(4L);
             em.persist(ju);
 
             var teaMovie = new Movie("Crash Tea", "A documentary about tea.",

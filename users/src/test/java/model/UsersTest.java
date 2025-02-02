@@ -8,11 +8,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static model.PersistenceUnit.DERBY_EMBEDDED_USERS_MS;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UsersTest {
 
+    public static final String ENRIUSER_USERNAME = "emolinari";
+    public static final String ENRIUSER_PWD = "1234567895555";
+    public static final String ENRIUSER_EMAIL = "enrique.molinari@gmail.com";
+    public static final String ENRIUSER_NAME = "Enrique";
+    public static final String ENRIUSER_SURNAME = "Molinari";
     private static final String JOSEUSER_SURNAME = "aSurname";
     private static final String JOSEUSER_NAME = "Jose";
     private static final String JOSEUSER_PASS = "password12345679";
@@ -85,6 +92,23 @@ public class UsersTest {
     }
 
     @Test
+    public void usersProfileByIds() {
+        var users = getUsers();
+        var userIdJose = registerUserJose(users);
+        var userIdEnri = registerUserEnri(users);
+        var userProfiles = users.allUsersProfileBy(List.of(userIdEnri, userIdJose));
+        assertEquals(2, userProfiles.size());
+        var joseProfile = userProfiles.stream().filter(u -> u.username().equals(JOSEUSER_USERNAME)).toList().getFirst();
+        var enriProfile = userProfiles.stream().filter(u -> u.username().equals(ENRIUSER_USERNAME)).toList().getFirst();
+        assertEquals(ENRIUSER_EMAIL, enriProfile.email());
+        assertEquals(ENRIUSER_NAME + " " + ENRIUSER_SURNAME,
+                enriProfile.fullname());
+        assertEquals(JOSEUSER_EMAIL, joseProfile.email());
+        assertEquals(JOSEUSER_NAME + " " + JOSEUSER_SURNAME,
+                joseProfile.fullname());
+    }
+
+    @Test
     public void userProfileFrom() {
         var users = getUsers();
         var userId = registerUserJose(users);
@@ -122,6 +146,13 @@ public class UsersTest {
                 JOSEUSER_EMAIL,
                 JOSEUSER_USERNAME,
                 JOSEUSER_PASS, JOSEUSER_PASS);
+    }
+
+    private Long registerUserEnri(Users users) {
+        return users.registerUser(ENRIUSER_NAME, ENRIUSER_SURNAME,
+                ENRIUSER_EMAIL,
+                ENRIUSER_USERNAME,
+                ENRIUSER_PWD, ENRIUSER_PWD);
     }
 
     @AfterEach

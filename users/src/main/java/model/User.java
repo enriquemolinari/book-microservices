@@ -20,7 +20,6 @@ import static model.Schema.*;
 public class User {
 
     static final String INVALID_USERNAME = "A valid username must be provided";
-    static final String POINTS_MUST_BE_GREATER_THAN_ZERO = "Points must be greater than zero";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,8 +33,6 @@ public class User {
     // password must not escape by any means out of this object
     @Embedded
     private Password password;
-    @Column(name = USER_POINTS_COLUMN_NAME)
-    private int points;
 
     public User(String name, String surname, String email, String userName, String password,
                 String repeatPassword) {
@@ -46,7 +43,6 @@ public class User {
         this.email = new Email(email).asString();
         this.userName = new NotBlankString(userName,
                 new UsersException(INVALID_USERNAME)).value();
-        this.points = 0;
     }
 
     boolean hasPassword(String password) {
@@ -58,18 +54,7 @@ public class User {
         this.password.change(currentPassword, newPassword1, newPassword2);
     }
 
-    void newEarnedPoints(int points) {
-        if (points <= 0) {
-            throw new UsersException(POINTS_MUST_BE_GREATER_THAN_ZERO);
-        }
-        this.points += points;
-    }
-
-    public boolean hasPoints(int points) {
-        return this.points == points;
-    }
-
-    public String userName() {
+    String userName() {
         return userName;
     }
 
@@ -98,8 +83,8 @@ public class User {
     }
 
     public UserProfile toProfile() {
-        return new UserProfile(this.fullName(), this.userName,
-                this.email, this.points);
+        return new UserProfile(this.id, this.fullName(), this.userName,
+                this.email);
     }
 
     private String fullName() {

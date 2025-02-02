@@ -49,7 +49,7 @@ public class Shows implements ShowsSubSystem {
                         Movie.class).setParameter(1, LocalDateTime.now())
                 .setParameter(2, untilTo).getResultList();
         return movies.stream()
-                .map(m -> m.toMovieShow())
+                .map(Movie::toMovieShow)
                 .toList();
     }
 
@@ -121,6 +121,12 @@ public class Shows implements ShowsSubSystem {
         return new Tx(emf).inTx(em -> {
             em.persist(new Buyer(id));
             return id;
+        });
+    }
+
+    Buyer buyerBy(Long buyerId) {
+        return new Tx(emf).inTx(em -> {
+            return findByIdOrThrows(Buyer.class, buyerId, BUYER_ID_NOT_EXISTS, em);
         });
     }
 

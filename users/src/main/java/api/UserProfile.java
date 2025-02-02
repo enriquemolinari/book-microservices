@@ -1,6 +1,6 @@
 package api;
 
-public record UserProfile(String fullname, String username, String email,
-                          int points) {
+public record UserProfile(Long userId, String fullname, String username,
+                          String email) {
 
 }

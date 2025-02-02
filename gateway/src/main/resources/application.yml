@@ -16,6 +16,10 @@ spring:
             - Path=/movies/private/**
           filters:
             - TokenVerificationFilter
+        - id: movies_composed
+          uri: ${server.ms.host}:${port.composer}
+          predicates:
+            - Path=/composed/movies/**
         - id: movies_public_get
           uri: ${server.ms.host}:${port.movies}
           predicates:

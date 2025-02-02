@@ -1,5 +1,7 @@
 package api;
 
+import java.util.List;
+
 public interface UsersSubSystem {
 
     String login(String username, String password);
@@ -15,4 +17,6 @@ public interface UsersSubSystem {
     Long registerUser(String name, String surname, String email,
                       String userName,
                       String password, String repeatPassword);
+
+    List<UserProfile> allUsersProfileBy(List<Long> ids);
 }

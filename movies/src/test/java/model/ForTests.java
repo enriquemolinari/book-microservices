@@ -41,15 +41,15 @@ public class ForTests {
 
 
     User createUserCharly() {
-        return new User(1L, "cedgun");
+        return new User(1L);
     }
 
     User createUserJoseph() {
-        return new User(2L, "jvaldun");
+        return new User(2L);
     }
 
     User createUserNicolas() {
-        return new User(3L, "nmolinari");
+        return new User(3L);
     }
 
     DetailedMovieInfo createSuperMovie(Movies cinema) {

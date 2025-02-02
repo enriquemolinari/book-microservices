@@ -8,6 +8,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.function.Function;
 
 @RestController
@@ -45,6 +46,12 @@ public class UsersController {
             var profile = usersSubSystem.profileFrom(uid);
             return ResponseEntity.ok(profile);
         });
+    }
+
+    @GetMapping("/users/profile/by/{ids}")
+    public ResponseEntity<List<UserProfile>> usersProfileBy(
+            @PathVariable List<Long> ids) {
+        return ResponseEntity.ok(usersSubSystem.allUsersProfileBy(ids));
     }
 
     @PostMapping("/users/private/changepassword")

@@ -217,6 +217,8 @@ public class ShowsTest {
         assertTrue(detailedShow.currentSeats().contains(new Seat(3, true)));
         assertTrue(detailedShow.currentSeats().contains(new Seat(4, true)));
         assertTrue(detailedShow.currentSeats().contains(new Seat(5, false)));
+        var joseBuyer = shows.buyerBy(joseId);
+        assertEquals(20, joseBuyer.points());
     }
 
     @Test

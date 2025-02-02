@@ -1,6 +1,5 @@
 package model;
 
-import api.UserProfile;
 import api.UsersException;
 import common.Email;
 import org.junit.jupiter.api.Test;
@@ -119,34 +118,11 @@ public class UserTest {
     }
 
     @Test
-    public void newCreatedUserHasZeroPoints() {
-        var u = createUserEnrique();
-        assertTrue(u.hasPoints(0));
-    }
-
-    @Test
     public void userProfile() {
         var u = createUserEnrique();
-
-        assertEquals(new UserProfile("Enrique Molinari", "enriquemolinari",
-                "enrique.molinari@gmail.com", 0), u.toProfile());
+        var profile = u.toProfile();
+        assertEquals("Enrique Molinari", profile.fullname());
+        assertEquals("enriquemolinari", profile.username());
+        assertEquals("enrique.molinari@gmail.com", profile.email());
     }
-
-    @Test
-    public void userEarnsSomePoints() {
-        var u = createUserEnrique();
-        u.newEarnedPoints(10);
-        assertTrue(u.hasPoints(10));
-    }
-
-    @Test
-    public void userEarnsAnInvalidNumberOfPoints() {
-        var u = createUserEnrique();
-
-        Exception e = assertThrows(UsersException.class, () -> {
-            u.newEarnedPoints(0);
-        });
-        assertEquals(User.POINTS_MUST_BE_GREATER_THAN_ZERO, e.getMessage());
-    }
-
 }

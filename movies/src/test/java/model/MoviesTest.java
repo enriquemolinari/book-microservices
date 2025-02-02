@@ -19,9 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MoviesTest {
 
-    private static final String JOSEUSER_USERNAME = "joseuser";
     private static final Long NON_EXISTENT_ID = -2L;
-    private static final String ANTONIOUSER_USERNAME = "antonio";
 
     private final ForTests tests = new ForTests();
     private EntityManagerFactory emf;
@@ -51,7 +49,7 @@ public class MoviesTest {
         var joseId = registerUserJose(movies);
         var userRate = movies.rateMovieBy(joseId, movieInfo.id(), 4,
                 "great movie");
-        assertEquals(JOSEUSER_USERNAME, userRate.username());
+        assertEquals(joseId, userRate.userId());
         assertEquals(4, userRate.rateValue());
     }
 
@@ -77,8 +75,8 @@ public class MoviesTest {
         movies.rateMovieBy(antonioId, movieInfo.id(), 3, "regular movie");
         var userRates = movies.pagedRatesOfOrderedDate(movieInfo.id(), 1);
         assertEquals(2, userRates.size());
-        assertEquals(ANTONIOUSER_USERNAME, userRates.get(0).username());
-        assertEquals(JOSEUSER_USERNAME, userRates.get(1).username());
+        assertEquals(antonioId, userRates.get(0).userId());
+        assertEquals(joseId, userRates.get(1).userId());
     }
 
     @Test
@@ -210,15 +208,15 @@ public class MoviesTest {
     }
 
     private Long registerUserJose(Movies movies) {
-        return movies.addNewUser(1L, JOSEUSER_USERNAME);
+        return movies.addNewUser(1L);
     }
 
     private Long registerUserAntonio(Movies movies) {
-        return movies.addNewUser(2L, ANTONIOUSER_USERNAME);
+        return movies.addNewUser(2L);
     }
 
     private Long registerAUser(Movies movies) {
-        return movies.addNewUser(3L, "username");
+        return movies.addNewUser(3L);
     }
 
     @AfterEach

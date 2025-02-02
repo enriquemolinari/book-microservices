@@ -35,7 +35,6 @@ public class UsersControllerTest {
     private static final String PASSWORD_KEY = "password";
     private static final String JOSE_FULLNAME = "Josefina Simini";
     private static final String JOSE_EMAIL = "jsimini@mymovies.com";
-    private static final String POINTS_KEY = "points";
     private static final String EMAIL_KEY = "email";
     private static final String FULLNAME_KEY = "fullname";
     private static final String USERNAME_KEY = "username";
@@ -59,7 +58,6 @@ public class UsersControllerTest {
         response.then().body(FULLNAME_KEY, is(JOSE_FULLNAME))
                 .body(USERNAME_KEY, is(USERNAME_JOSE))
                 .body(EMAIL_KEY, is(JOSE_EMAIL))
-                .body(POINTS_KEY, equalTo(0))
                 .cookie(TOKEN_COOKIE_NAME, containsString("v2.local"));
     }
 
@@ -77,7 +75,7 @@ public class UsersControllerTest {
     private Response loginAsJosePost() {
         return loginAsPost(USERNAME_JOSE, PASSWORD_JOSE);
     }
-    
+
     private Response loginAsLuciaPost() {
         return loginAsPost("lucia", "123456789012");
     }
@@ -224,8 +222,31 @@ public class UsersControllerTest {
 
         response.then().body(USERNAME_KEY, is(USERNAME_JOSE))
                 .body(FULLNAME_KEY, is(JOSE_FULLNAME))
-                .body(POINTS_KEY, is(0))
                 .body(EMAIL_KEY, is(JOSE_EMAIL));
+    }
+
+    @Test
+    public void retrieveUsersByIds() {
+        var response = given()
+                .get(urlForTests() + "/users/profile/by/1,2");
+
+        response.then().body("$",
+                hasItem(allOf(both(hasEntry("userId", 1)).and(
+                                (hasEntry("fullname",
+                                        "Enrique Molinari")))
+                        .and(
+                                (hasEntry("username",
+                                        "emolinari")))
+                        .and(hasEntry("email", "enrique.molinari@gmail.com")))));
+        response.then().body("$",
+                hasItem(allOf(both(hasEntry("userId", 2))
+                        .and(
+                                (hasEntry("fullname",
+                                        "Nicolas Molimini")))
+                        .and(
+                                (hasEntry("username",
+                                        "nico")))
+                        .and(hasEntry("email", "nico@mymovies.com")))));
     }
 
     private String loginAsLuciaAndGetCookie() {

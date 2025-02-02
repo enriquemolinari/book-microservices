@@ -9,6 +9,8 @@ import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
+import java.util.List;
+
 public class Users implements UsersSubSystem {
     static final String USER_NAME_ALREADY_EXISTS = "userName already exists";
     static final String USER_ID_NOT_EXISTS = "User not registered";
@@ -42,7 +44,7 @@ public class Users implements UsersSubSystem {
             if (mightBeAUser.isEmpty()) {
                 throw new AuthException(USER_OR_PASSWORD_ERROR);
             }
-            var user = mightBeAUser.get(0);
+            var user = mightBeAUser.getFirst();
             em.persist(new LoginAudit(this.dateTimeProvider.now(), user));
             return token.tokenFrom(user.toMap());
         });
@@ -86,6 +88,18 @@ public class Users implements UsersSubSystem {
             return userBy(userId, em).toProfile();
         });
     }
+
+    @Override
+    public List<UserProfile> allUsersProfileBy(List<Long> ids) {
+        return new Tx(this.emf).inTx(em -> {
+            return em.createQuery("from User u "
+                            + "where u.id IN ?1 ", User.class)
+                    .setHint("org.hibernate.cacheable", "true")
+                    .setParameter(1, ids).getResultList().stream()
+                    .map(User::toProfile).toList();
+        });
+    }
+
 
     @Override
     public void changePassword(Long userId, String currentPassword,

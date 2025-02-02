@@ -41,7 +41,7 @@ public class Movies implements MoviesSubSystem {
         });
     }
 
-    public void modifyMovieName(Long id, String newName) {
+    void modifyMovieName(Long id, String newName) {
         new Tx(this.emf).inTx(em -> {
             var movien = movieBy(id, em);
             movien.name(newName);
@@ -212,9 +212,9 @@ public class Movies implements MoviesSubSystem {
         });
     }
 
-    Long addNewUser(Long id, String username) {
+    Long addNewUser(Long id) {
         return new Tx(this.emf).inTx(em -> {
-            em.persist(new User(id, username));
+            em.persist(new User(id));
             return id;
         });
     }

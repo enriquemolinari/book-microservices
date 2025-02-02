@@ -1,13 +1,13 @@
 package model;
 
+import api.MoviesException;
+import api.UserMovieRate;
 import common.FormattedDateTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import api.MoviesException;
-import api.UserMovieRate;
 
 import java.time.LocalDateTime;
 
@@ -52,7 +52,7 @@ class UserRate {
     }
 
     public UserMovieRate toUserMovieRate() {
-        return new UserMovieRate(this.user.userName(), value,
+        return new UserMovieRate(this.user.id(), value,
                 new FormattedDateTime(ratedAt).toString(), comment);
     }
 }

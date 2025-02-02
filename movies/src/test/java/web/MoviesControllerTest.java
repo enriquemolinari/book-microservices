@@ -24,10 +24,9 @@ import static web.MoviesController.FW_GATEWAY_USER_ID;
 public class MoviesControllerTest {
 
     public static final String NICO_USER_ID = "2";
-    public static final String NICO_USERNAME = "nico";
+    public static final String USER_ID_KEY = "userId";
     private static final String COMMENT_KEY = "comment";
     private static final String RATE_VALUE_KEY = "rateValue";
-    private static final String USERNAME_KEY = "username";
     private static final String JSON_ROOT = "$";
     private static final String MOVIE_NAME_KEY = "name";
     private static final String MOVIE_ACTORS_KEY = "actors";
@@ -137,13 +136,13 @@ public class MoviesControllerTest {
         var response = get(urlForTests() + "/movies/1/rate");
 
         response.then().body(JSON_ROOT,
-                hasItem(allOf(both(hasEntry(USERNAME_KEY, "lucia")).and(
+                hasItem(allOf(both(hasEntry(USER_ID_KEY, 3)).and(
                                 (hasEntry(COMMENT_KEY,
                                         "I really enjoy the movie")))
                         .and(hasEntry(RATE_VALUE_KEY, 4)))));
 
         response.then().body(JSON_ROOT,
-                hasItem(allOf(both(hasEntry(USERNAME_KEY, NICO_USERNAME)).and(
+                hasItem(allOf(both(hasEntry(USER_ID_KEY, Integer.valueOf(NICO_USER_ID))).and(
                                 (hasEntry(COMMENT_KEY,
                                         "Fantastic! The actors, the music, everything is fantastic!")))
                         .and(hasEntry(RATE_VALUE_KEY, 5)))));
@@ -160,7 +159,7 @@ public class MoviesControllerTest {
                 .body(rateRequestBody.toString())
                 .post(urlForTests() + "/movies/private/" + NICO_USER_ID + "/rate");
 
-        response.then().body(USERNAME_KEY, is(NICO_USERNAME))
+        response.then().body(USER_ID_KEY, is(Integer.valueOf(NICO_USER_ID)))
                 .body(RATE_VALUE_KEY, is(4))
                 .body(COMMENT_KEY, is("a comment..."));
     }

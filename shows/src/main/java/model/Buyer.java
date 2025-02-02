@@ -18,23 +18,28 @@ import static model.Schema.USER_ENTITY_TABLE_NAME;
 @Setter(value = AccessLevel.PRIVATE)
 @Getter(value = AccessLevel.PRIVATE)
 public class Buyer {
-    static final String INVALID_USERNAME = "A valid username must be provided";
-
     @Id
     private long id;
     @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "purchaser")
     private List<Sale> purchases;
+    private long points;
 
     public Buyer(long id) {
         this.id = id;
+        this.points = 0L;
         this.purchases = new ArrayList<>();
     }
 
     void newPurchase(Sale sale) {
         this.purchases.add(sale);
+        this.points += sale.points();
     }
 
     Long id() {
         return id;
+    }
+
+    long points() {
+        return points;
     }
 }

@@ -86,4 +86,8 @@ class Sale {
                 movieId,
                 startTime);
     }
+
+    long points() {
+        return this.pointsWon;
+    }
 }

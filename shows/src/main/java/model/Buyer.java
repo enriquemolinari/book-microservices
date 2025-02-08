@@ -1,5 +1,6 @@
 package model;
 
+import api.BuyerInfo;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,5 +42,9 @@ public class Buyer {
 
     long points() {
         return points;
+    }
+
+    public BuyerInfo info() {
+        return new BuyerInfo(this.id, this.points);
     }
 }

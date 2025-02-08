@@ -68,6 +68,15 @@ public class ShowsControllerTest {
     }
 
     @Test
+    public void buyerById() {
+        var response = given()
+                .header(FW_GATEWAY_USER_ID, "1")
+                .get(urlForTests() + "/shows/buyer");
+        response.then().body("buyerId", is(1));
+        response.then().body("points", is(0));
+    }
+
+    @Test
     public void reserveAShowFailIfNotAuthenticated() {
         JSONArray seatsRequest = jsonBodyForReserveSeats(5, 7, 9);
         var response = given().contentType(JSON_CONTENT_TYPE)

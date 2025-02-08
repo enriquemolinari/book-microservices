@@ -44,8 +44,8 @@ public class Shows implements ShowsSubSystem {
     private List<MovieShows> movieShowsUntil(LocalDateTime untilTo, EntityManager em) {
         List<Movie> movies = em.createQuery(
                         "from Movie m "
-                                + "join fetch m.showTimes s join fetch s.screenedIn "
-                                + "where s.startTime >= ?1 and s.startTime <= ?2 ",
+                        + "join fetch m.showTimes s join fetch s.screenedIn "
+                        + "where s.startTime >= ?1 and s.startTime <= ?2 ",
                         Movie.class).setParameter(1, LocalDateTime.now())
                 .setParameter(2, untilTo).getResultList();
         return movies.stream()
@@ -109,6 +109,12 @@ public class Shows implements ShowsSubSystem {
         });
     }
 
+    public BuyerInfo buyer(Long userId) {
+        return new Tx(emf).inTx(em -> {
+            return buyerInfoBy(userId).info();
+        });
+    }
+
     // used for testing only
     Long addNewMovie(Long id) {
         return new Tx(emf).inTx(em -> {
@@ -124,7 +130,7 @@ public class Shows implements ShowsSubSystem {
         });
     }
 
-    Buyer buyerBy(Long buyerId) {
+    Buyer buyerInfoBy(Long buyerId) {
         return new Tx(emf).inTx(em -> {
             return findByIdOrThrows(Buyer.class, buyerId, BUYER_ID_NOT_EXISTS, em);
         });

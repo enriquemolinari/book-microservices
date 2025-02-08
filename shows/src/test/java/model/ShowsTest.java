@@ -217,7 +217,7 @@ public class ShowsTest {
         assertTrue(detailedShow.currentSeats().contains(new Seat(3, true)));
         assertTrue(detailedShow.currentSeats().contains(new Seat(4, true)));
         assertTrue(detailedShow.currentSeats().contains(new Seat(5, false)));
-        var joseBuyer = shows.buyerBy(joseId);
+        var joseBuyer = shows.buyerInfoBy(joseId);
         assertEquals(20, joseBuyer.points());
     }
 
@@ -241,6 +241,41 @@ public class ShowsTest {
         });
         assertEquals(Shows.THEATER_ID_DOES_NOT_EXISTS, e.getMessage());
     }
+
+    @Test
+    public void buyerInfoAfterPaySeats() {
+        var shows = createShowsSubSystem(DateTimeProvider.create());
+        var joseId = registerUserJose(shows);
+        payForSeats(shows, joseId);
+        var infoAfterPay = shows.buyerInfoBy(joseId);
+        assertEquals(1L, infoAfterPay.id());
+        assertEquals(20L, infoAfterPay.points());
+    }
+
+    @Test
+    public void buyerInfoNewlyCreatedUser() {
+        var shows = createShowsSubSystem(DateTimeProvider.create());
+        var joseId = registerUserJose(shows);
+        var info = shows.buyerInfoBy(joseId);
+        assertEquals(1L, info.id());
+        assertEquals(0L, info.points());
+    }
+
+    private void payForSeats(Shows shows, Long joseId) {
+        var movieId = tests.createAMovie(shows, 1L);
+        long theaterId = createATheater(shows);
+        var showInfo = shows.addNewShowFor(movieId,
+                LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
+                        13, 30),
+                10f, theaterId, 20);
+
+        shows.reserve(joseId, showInfo.showId(), Set.of(1, 5));
+        shows.pay(joseId, showInfo.showId(), Set.of(1, 5),
+                JOSEUSER_CREDIT_CARD_NUMBER,
+                JOSEUSER_CREDIT_CARD_EXPIRITY,
+                JOSEUSER_CREDIT_CARD_SEC_CODE);
+    }
+
 
     private Shows createShowsSubSystem(DateTimeProvider dateTimeProvider) {
         return new Shows(emf,

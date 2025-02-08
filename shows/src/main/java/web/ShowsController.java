@@ -60,6 +60,12 @@ public class ShowsController {
         return ResponseEntity.ok(ticket);
     }
 
+    @GetMapping("/shows/buyer")
+    public ResponseEntity<BuyerInfo> buyerBy(
+            @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId) {
+        return ResponseEntity.ok(this.showsSubSystem.buyer(userId));
+    }
+
     private <S> S ifUserIdInHeaderDo(Long userId, Function<Long, S> method) {
         if (userId == null) {
             throw new ShowsAuthException(AUTHENTICATION_REQUIRED);

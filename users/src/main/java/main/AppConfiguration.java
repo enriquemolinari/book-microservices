@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("default")
 public class AppConfiguration {
-    //TODO: move this outside repo
+    //this must be outside repository
     private static final String SECRET = "nXXh3Xjr2T0ofFilg3kw8BwDEyHmS6OIe4cjWUm2Sm0=";
 
     @Bean

@@ -46,6 +46,12 @@ spring:
           predicates:
             - Path=/users/**
             - Method=POST
+        - id: users_private_composed
+          uri: ${server.ms.host}:${port.composer}
+          predicates:
+            - Path=/composed/users/private/**
+          filters:
+            - TokenVerificationFilter
         - id: users_private
           uri: ${server.ms.host}:${port.users}
           predicates:

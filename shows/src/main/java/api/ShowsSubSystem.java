@@ -22,4 +22,6 @@ public interface ShowsSubSystem {
     Ticket pay(Long userId, Long showTimeId, Set<Integer> selectedSeats,
                String creditCardNumber, YearMonth expirationDate,
                String secturityCode);
+
+    BuyerInfo buyer(Long userId);
 }

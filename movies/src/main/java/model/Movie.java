@@ -183,4 +183,8 @@ public class Movie {
     public void name(String newName) {
         this.name = newName;
     }
+
+    long id() {
+        return this.id;
+    }
 }

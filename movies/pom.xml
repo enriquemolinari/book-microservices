@@ -102,6 +102,12 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.github.enriquemolinari</groupId>
+            <artifactId>jqueue</artifactId>
+            <version>0.0.5</version>
+        </dependency>
+        
         <!-- tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
+import model.events.NewMovieEvent;
+import model.queue.JQueueInTxtQueue;
+import model.queue.JQueueTable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -79,6 +82,7 @@ public class Movies implements MoviesSubSystem {
         return new Tx(this.emf).inTx(em -> {
             var movie = new Movie(name, plot, duration, releaseDate, genres);
             em.persist(movie);
+            new JQueueInTxtQueue(em).push(new NewMovieEvent(movie.id()).toJson());
             return movie.toDetailedInfo();
         });
     }
@@ -218,6 +222,13 @@ public class Movies implements MoviesSubSystem {
             return id;
         });
     }
+
+    List<JQueueTable> allQueued() {
+        return new Tx(this.emf).inTx(em -> {
+            return em.createQuery("from JQueueTable", JQueueTable.class).getResultList();
+        });
+    }
+
 
     @Override
     public List<DetailedMovieInfo> pagedMoviesSortedByRate(int pageNumber) {

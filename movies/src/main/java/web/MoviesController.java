@@ -78,6 +78,18 @@ public class MoviesController {
         return ResponseEntity.ok(userMovieRated);
     }
 
+    @PostMapping("/movies/private/new")
+    public ResponseEntity<DetailedMovieInfo> addNewMovie(
+            @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId,
+            @RequestBody NewMovieRequest movieRequest) {
+
+        var detailedMovieInfo = ifUserIdInHeaderDo(userId, (uid) -> {
+            return this.moviesSubSystem.addNewMovie(movieRequest.name(), movieRequest.duration(),
+                    movieRequest.releaseDate(), movieRequest.plot(), movieRequest.genres());
+        });
+        return ResponseEntity.ok(detailedMovieInfo);
+    }
+
     private <S> S ifUserIdInHeaderDo(Long userId, Function<Long, S> method) {
         if (userId == null) {
             throw new MoviesAuthException(AUTHENTICATION_REQUIRED);

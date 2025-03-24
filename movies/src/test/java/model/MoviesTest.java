@@ -6,10 +6,13 @@ import api.MovieInfo;
 import api.MoviesException;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import model.events.NewMovieEvent;
+import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -154,6 +157,29 @@ public class MoviesTest {
                 .containsAll(genresStringsSetToUpperCase(allMoviesInfo, 1)));
         assertTrue(genresEnumSetToUpperCaseStrings(COMEDY_FANTASY_GENRES)
                 .containsAll(genresStringsSetToUpperCase(allMoviesInfo, 2)));
+    }
+
+    @Test
+    public void addNewMoviePushAnEventOk() {
+        var movies = createMoviesSubsystem();
+        var movieInfo = movies.addNewMovie(SUPER_MOVIE_NAME, SUPER_MOVIE_DURATION,
+                LocalDate.of(2023, 4, 5),
+                SUPER_MOVIE_PLOT,
+                ACTION_ADVENTURE_GENRES);
+        movies.addActorTo(movieInfo.id(), "Carlos", "Kalchi",
+                "carlosk@bla.com", "aCharacterName");
+        movies.addActorTo(movieInfo.id(), "Jose", "Hermes",
+                "jose@bla.com", "anotherCharacterName");
+        movies.addDirectorToMovie(movieInfo.id(), "aDirectorName", "surname",
+                "adir@bla.com");
+        List<JQueueTable> jQueueTables = movies.allQueued();
+        var movie = movies.movie(movieInfo.id());
+        assertEquals(SUPER_MOVIE_NAME, movie.name());
+        assertEquals(SUPER_MOVIE_PLOT, movie.plot());
+        assertEquals("1hr 49mins", movie.duration());
+        assertEquals("04-05-2023", movie.releaseDate());
+        assertTrue(Set.of("Action", "Adventure").containsAll(movie.genres()));
+        assertEquals(new NewMovieEvent(movieInfo.id()).toJson(), jQueueTables.getFirst().getData());
     }
 
     private List<String> genresStringsSetToUpperCase(List<MovieInfo> allMoviesInfo, int index) {

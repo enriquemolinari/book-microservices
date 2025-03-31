@@ -179,6 +179,7 @@ public class MoviesTest {
         assertEquals("1hr 49mins", movie.duration());
         assertEquals("04-05-2023", movie.releaseDate());
         assertTrue(Set.of("Action", "Adventure").containsAll(movie.genres()));
+        assertEquals(1, jQueueTables.size());
         assertEquals(new NewMovieEvent(movieInfo.id()).toJson(), jQueueTables.getFirst().getData());
     }
 

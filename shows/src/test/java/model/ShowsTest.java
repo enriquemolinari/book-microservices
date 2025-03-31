@@ -216,6 +216,7 @@ public class ShowsTest {
         var joseBuyer = shows.buyerInfoBy(joseId);
         assertEquals(20, joseBuyer.points());
         List<JQueueTable> jQueueTables = shows.allQueued();
+        assertEquals(1, jQueueTables.size());
         assertEquals(new NewTicketsSoldEvent("123-456-789").toJson(), jQueueTables.getFirst().getData());
     }
 

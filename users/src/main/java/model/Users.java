@@ -8,6 +8,9 @@ import common.DateTimeProvider;
 import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import model.events.NewUserEvent;
+import model.queue.JQueueInTxtQueue;
+import model.queue.JQueueTable;
 
 import java.util.List;
 
@@ -60,9 +63,7 @@ public class Users implements UsersSubSystem {
                     password,
                     repeatPassword);
             em.persist(user);
-            //within the Tx
-            //TODO: publish tx outbox
-//            this.publisher.notify(em, new NewUserEvent(user.id(), user.userName(), user.email()));
+            new JQueueInTxtQueue(em).push(new NewUserEvent(user.id()).toJson());
             return user.id();
         }, NUMBER_OF_RETRIES);
     }
@@ -120,5 +121,11 @@ public class Users implements UsersSubSystem {
             throw new UsersException(msg);
         }
         return e;
+    }
+    
+    List<JQueueTable> allQueued() {
+        return new Tx(this.emf).inTx(em -> {
+            return em.createQuery("from JQueueTable", JQueueTable.class).getResultList();
+        });
     }
 }

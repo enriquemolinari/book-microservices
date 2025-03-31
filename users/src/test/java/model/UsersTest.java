@@ -4,6 +4,8 @@ import api.AuthException;
 import api.UsersException;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import model.events.NewUserEvent;
+import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,17 +131,17 @@ public class UsersTest {
         assertEquals(Users.USER_ID_NOT_EXISTS, e.getMessage());
     }
 
-    //TODO: re-write once publishing events is in place
-//    @Test
-//    public void addRegisterNewUserPublishEvent() {
-//        var publisher = new FakePublisher();
-//        var users = getUsers();
-//        var userId = users.registerUser(JOSEUSER_NAME, JOSEUSER_SURNAME,
-//                JOSEUSER_EMAIL,
-//                JOSEUSER_USERNAME,
-//                JOSEUSER_PASS, JOSEUSER_PASS);
-//        assertTrue(publisher.invokedWithEvent(new NewUserEvent(userId, JOSEUSER_USERNAME, JOSEUSER_EMAIL)));
-//    }
+    @Test
+    public void addRegisterNewUserPublishEvent() {
+        var users = getUsers();
+        var userId = users.registerUser(JOSEUSER_NAME, JOSEUSER_SURNAME,
+                JOSEUSER_EMAIL,
+                JOSEUSER_USERNAME,
+                JOSEUSER_PASS, JOSEUSER_PASS);
+        List<JQueueTable> jQueueTables = users.allQueued();
+        assertEquals(1, jQueueTables.size());
+        assertEquals(new NewUserEvent(userId).toJson(), jQueueTables.getFirst().getData());
+    }
 
     private Long registerUserJose(Users users) {
         return users.registerUser(JOSEUSER_NAME, JOSEUSER_SURNAME,

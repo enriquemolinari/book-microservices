@@ -21,8 +21,8 @@ import static model.Schema.DATABASE_SCHEMA_NAME;
 @Setter(value = AccessLevel.PRIVATE)
 @Getter(value = AccessLevel.PRIVATE)
 class Sale {
-
     public static final String SALE_CANNOT_BE_CREATED_WITHOUT_SEATS = "Sale cannot be created without seats";
+    private String salesIdentifier;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -33,17 +33,17 @@ class Sale {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private Buyer purchaser;
-
     private int pointsWon;
 
     @OneToMany
     @JoinColumn(name = "id_sale")
     private Set<ShowSeat> seatsSold;
 
-    private Sale(float totalAmount,
+    private Sale(String salesIdentifier, float totalAmount,
                  Buyer buyerThatPurchased,
                  Set<ShowSeat> seatsSold,
                  int pointsWon) {
+        this.salesIdentifier = salesIdentifier;
         this.total = totalAmount;
         this.purchaser = buyerThatPurchased;
         this.seatsSold = seatsSold;
@@ -52,12 +52,12 @@ class Sale {
         buyerThatPurchased.newPurchase(this);
     }
 
-    public static Ticket registerNewSaleFor(Buyer buyerThatPurchased,
+    public static Ticket registerNewSaleFor(String salesIdentifier, Buyer buyerThatPurchased,
                                             float totalAmount,
                                             int pointsWon,
                                             Set<ShowSeat> seatsSold) {
         checkSeatsNotEmpty(seatsSold);
-        return new Sale(totalAmount, buyerThatPurchased, seatsSold,
+        return new Sale(salesIdentifier, totalAmount, buyerThatPurchased, seatsSold,
                 pointsWon).ticket();
     }
 
@@ -79,7 +79,7 @@ class Sale {
         ShowSeat first = this.seatsSold.stream().findFirst().get();
         Long movieId = first.showMovieId();
         String startTime = first.showStartTime();
-        return new Ticket(total,
+        return new Ticket(this.salesIdentifier, total,
                 pointsWon,
                 formattedSalesDate(),
                 confirmedSeatNumbers(),

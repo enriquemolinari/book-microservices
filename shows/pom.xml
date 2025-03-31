@@ -96,12 +96,20 @@
             <version>1.18.36</version>
             <scope>compile</scope>
         </dependency>
+        
+        <!-- JQueue -->
+        <dependency>
+            <groupId>io.github.enriquemolinari</groupId>
+            <artifactId>jqueue</artifactId>
+            <version>0.0.5</version>
+        </dependency>
 
         <!-- tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.11.4</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

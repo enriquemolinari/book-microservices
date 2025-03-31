@@ -8,6 +8,7 @@ import java.util.Set;
 
 @Getter(value = AccessLevel.PUBLIC)
 public class Ticket {
+    private final String salesId;
     private final float total;
     private final int pointsWon;
     private final String salesDate;
@@ -15,8 +16,9 @@ public class Ticket {
     private final Long movieId;
     private final String showStartTime;
 
-    public Ticket(float total, int pointsWon,
+    public Ticket(String salesId, float total, int pointsWon,
                   String formattedSalesDate, List<Integer> payedSeats, Long movieId, String showStartTime) {
+        this.salesId = salesId;
         this.total = total;
         this.pointsWon = pointsWon;
         this.salesDate = formattedSalesDate;
@@ -32,4 +34,5 @@ public class Ticket {
     public float total() {
         return this.total;
     }
+
 }

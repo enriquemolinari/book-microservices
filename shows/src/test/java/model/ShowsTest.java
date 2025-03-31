@@ -7,6 +7,8 @@ import api.ShowsSubSystem;
 import common.DateTimeProvider;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import model.events.NewTicketsSoldEvent;
+import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.Set;
 
 import static model.PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS;
@@ -186,7 +189,7 @@ public class ShowsTest {
     @Test
     public void confirmAndPaySeats() {
         var fakePaymenentProvider = tests.fakePaymenentProvider();
-        var shows = new Shows(emf, fakePaymenentProvider);
+        var shows = new Shows(emf, fakePaymenentProvider, DateTimeProvider.create(), () -> "123-456-789");
         var movieId = tests.createAMovie(shows, 1L);
         long theaterId = createATheater(shows);
         var showInfo = shows.addNewShowFor(movieId,
@@ -199,13 +202,6 @@ public class ShowsTest {
                 JOSEUSER_CREDIT_CARD_NUMBER,
                 JOSEUSER_CREDIT_CARD_EXPIRITY,
                 JOSEUSER_CREDIT_CARD_SEC_CODE);
-//TODO: add once decided queue mechanisms
-        //        assertTrue(fakePublisher.invokedWithEvent(new TicketsSoldEvent(joseId,
-//                ticket.getPointsWon(),
-//                ticket.total(),
-//                ticket.getPayedSeats(),
-//                ticket.getMovieName(),
-//                ticket.getShowStartTime())));
         assertTrue(ticket.hasSeats(Set.of(1, 5)));
         assertTrue(fakePaymenentProvider.hasBeanCalledWith(
                 JOSEUSER_CREDIT_CARD_NUMBER,
@@ -219,6 +215,8 @@ public class ShowsTest {
         assertTrue(detailedShow.currentSeats().contains(new Seat(5, false)));
         var joseBuyer = shows.buyerInfoBy(joseId);
         assertEquals(20, joseBuyer.points());
+        List<JQueueTable> jQueueTables = shows.allQueued();
+        assertEquals(new NewTicketsSoldEvent("123-456-789").toJson(), jQueueTables.getFirst().getData());
     }
 
     @Test
@@ -280,7 +278,7 @@ public class ShowsTest {
     private Shows createShowsSubSystem(DateTimeProvider dateTimeProvider) {
         return new Shows(emf,
                 tests.doNothingPaymentProvider(),
-                dateTimeProvider);
+                dateTimeProvider, new UUIDSalesIdentifierGenerator());
     }
 
     private Long registerUserJose(Shows shows) {

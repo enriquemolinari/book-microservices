@@ -12,3 +12,5 @@ target/
 *.iml
 *.ipr
 /TODO.txt
+/movies/derby.log
+/users/derby.log

@@ -32,7 +32,7 @@ public class CashierTest {
     public void payOk() {
         reserveSeatsForCarlos(seatsForCarlos);
         var paymentProvider = tests.fakePaymenentProvider();
-        var cashier = new Cashier(paymentProvider);
+        var cashier = new Cashier(() -> "1234", paymentProvider);
         YearMonth expirationDate = getExpirationDate();
         var ticket = cashier.paySeatsFor(seatsForCarlos, aShow, carlos,
                 CreditCard.of("789456",
@@ -51,7 +51,7 @@ public class CashierTest {
     @Test
     public void payWithoutSeatsCannotBeCompleted() {
         Exception e = assertThrows(ShowsException.class, () -> {
-            new Cashier(tests.fakePaymenentProvider())
+            new Cashier(() -> "1234", tests.fakePaymenentProvider())
                     .paySeatsFor(Set.of(), aShow, carlos,
                             CreditCard.of("789456",
                                     getExpirationDate(),
@@ -68,7 +68,7 @@ public class CashierTest {
     public void paymentProviderRejectingCreditCard() {
         reserveSeatsForCarlos(seatsForCarlos);
         var paymentProvider = tests.fakePaymenentProviderThrowE();
-        var cashier = new Cashier(paymentProvider);
+        var cashier = new Cashier(() -> "1234", paymentProvider);
         YearMonth expirationDate = getExpirationDate();
         Exception e = assertThrows(ShowsException.class, () -> {
             cashier.paySeatsFor(seatsForCarlos, aShow, carlos,

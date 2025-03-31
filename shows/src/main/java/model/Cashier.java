@@ -8,9 +8,11 @@ import java.util.Set;
 public class Cashier {
     static final String CREDIT_CARD_DEBIT_HAS_FAILED = "Credit card debit have failed";
     static final String SELECTED_SEATS_SHOULD_NOT_BE_EMPTY = "Selected Seats should not be empty";
+    private final SalesIdentifierGenerator idGenerator;
     private final CreditCardPaymentProvider paymentGateway;
 
-    public Cashier(CreditCardPaymentProvider paymentGateway) {
+    public Cashier(SalesIdentifierGenerator idGenerator, CreditCardPaymentProvider paymentGateway) {
+        this.idGenerator = idGenerator;
         this.paymentGateway = paymentGateway;
     }
 
@@ -32,7 +34,7 @@ public class Cashier {
         // To handle this gracefully we should set up a compensation mechanism
         // not covered in this book
         var showSeats = showTime.confirmSeatsForUser(buyer, selectedSeats);
-        return Sale.registerNewSaleFor(buyer, total, showTime.pointsToEarn(), showSeats);
+        return Sale.registerNewSaleFor(this.idGenerator.generate(), buyer, total, showTime.pointsToEarn(), showSeats);
     }
 
     private void checkSelectedSeats(Set<Integer> selectedSeats) {

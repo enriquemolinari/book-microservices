@@ -5,6 +5,9 @@ import common.DateTimeProvider;
 import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import model.events.NewTicketsSoldEvent;
+import model.queue.JQueueInTxtQueue;
+import model.queue.JQueueTable;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -20,18 +23,20 @@ public class Shows implements ShowsSubSystem {
     private final EntityManagerFactory emf;
     private final CreditCardPaymentProvider paymentGateway;
     private final DateTimeProvider dateTimeProvider;
+    private final SalesIdentifierGenerator identifierGenerator;
 
     public Shows(EntityManagerFactory emf,
                  CreditCardPaymentProvider paymentGateway,
-                 DateTimeProvider provider) {
+                 DateTimeProvider provider, SalesIdentifierGenerator identifierGenerator) {
         this.emf = emf;
         this.paymentGateway = paymentGateway;
         this.dateTimeProvider = provider;
+        this.identifierGenerator = identifierGenerator;
     }
 
     public Shows(EntityManagerFactory emf,
                  CreditCardPaymentProvider paymentGateway) {
-        this(emf, paymentGateway, DateTimeProvider.create());
+        this(emf, paymentGateway, DateTimeProvider.create(), new UUIDSalesIdentifierGenerator());
     }
 
     @Override
@@ -44,8 +49,8 @@ public class Shows implements ShowsSubSystem {
     private List<MovieShows> movieShowsUntil(LocalDateTime untilTo, EntityManager em) {
         List<Movie> movies = em.createQuery(
                         "from Movie m "
-                        + "join fetch m.showTimes s join fetch s.screenedIn "
-                        + "where s.startTime >= ?1 and s.startTime <= ?2 ",
+                                + "join fetch m.showTimes s join fetch s.screenedIn "
+                                + "where s.startTime >= ?1 and s.startTime <= ?2 ",
                         Movie.class).setParameter(1, LocalDateTime.now())
                 .setParameter(2, untilTo).getResultList();
         return movies.stream()
@@ -94,17 +99,12 @@ public class Shows implements ShowsSubSystem {
         return new Tx(emf).inTx(em -> {
             ShowTime showTime = showTimeBy(showTimeId, em);
             var user = buyerBy(userId, em);
-            var ticket = new Cashier(this.paymentGateway).paySeatsFor(selectedSeats,
-                    showTime,
-                    user,
-                    CreditCard.of(creditCardNumber, expirationDate, secturityCode));
-            //TODO: publish event in Rabbit
-//            this.publisher.notify(em, new TicketsSoldEvent(userId,
-//                    ticket.getPointsWon(),
-//                    ticket.total(),
-//                    ticket.getPayedSeats(),
-//                    ticket.getMovieName(),
-//                    ticket.getShowStartTime()));
+            var ticket = new Cashier(this.identifierGenerator, this.paymentGateway)
+                    .paySeatsFor(selectedSeats,
+                            showTime,
+                            user,
+                            CreditCard.of(creditCardNumber, expirationDate, secturityCode));
+            new JQueueInTxtQueue(em).push(new NewTicketsSoldEvent(ticket.getSalesId()).toJson());
             return ticket;
         });
     }
@@ -165,6 +165,12 @@ public class Shows implements ShowsSubSystem {
         return new Tx(emf).inTx(em -> {
             var show = showTimeBy(id, em);
             return show.toDetailedInfo();
+        });
+    }
+
+    List<JQueueTable> allQueued() {
+        return new Tx(this.emf).inTx(em -> {
+            return em.createQuery("from JQueueTable", JQueueTable.class).getResultList();
         });
     }
 }

@@ -14,7 +14,7 @@ public class SaleTest {
     @Test
     public void saleCannotBeCreatedWithEmptySeats() {
         Exception e = assertThrows(ShowsException.class, () -> {
-            var sale = Sale.registerNewSaleFor(tests.createUserNicolas(),
+            var sale = Sale.registerNewSaleFor("id-1234", tests.createUserNicolas(),
                     100f,
                     10,
                     Set.of());

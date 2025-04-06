@@ -1,5 +1,6 @@
 package model;
 
+import api.SaleInfo;
 import api.ShowsException;
 import api.Ticket;
 import common.FormattedDateTime;
@@ -85,6 +86,16 @@ class Sale {
                 confirmedSeatNumbers(),
                 movieId,
                 startTime);
+    }
+
+    SaleInfo saleInfo() {
+        ShowSeat showSeat = this.seatsSold.stream().findFirst().get();
+        return new SaleInfo(this.salesIdentifier, showSeat.showMovieId(),
+                this.purchaser.id(),
+                this.total,
+                this.pointsWon,
+                confirmedSeatNumbers(),
+                showSeat.showStartTime());
     }
 
     long points() {

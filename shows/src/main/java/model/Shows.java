@@ -109,6 +109,20 @@ public class Shows implements ShowsSubSystem {
         });
     }
 
+    @Override
+    public SaleInfo sale(String salesIdentifier) {
+        return new Tx(emf).inTx(em -> {
+            var list = em.createQuery("from Sale where salesIdentifier = :saleid", Sale.class)
+                    .setParameter("saleid", salesIdentifier)
+                    .getResultList();
+            if (list.isEmpty()) {
+                throw new ShowsException("Sale not found");
+            }
+            Sale first = list.getFirst();
+            return first.saleInfo();
+        });
+    }
+
     public BuyerInfo buyer(Long userId) {
         return new Tx(emf).inTx(em -> {
             return buyerInfoBy(userId).info();

@@ -125,6 +125,25 @@ public class ShowsControllerTest {
     }
 
     @Test
+    public void saleInfoIsReturnedAfterPay() throws JSONException {
+        JSONArray seatsRequest = jsonBodyForReserveSeats(10, 11);
+        reservePost("2", seatsRequest, 1);
+        JSONObject paymentRequest = paymentRequestForSeats(seatsRequest);
+        var response = payShowOneForUserTwoPost(paymentRequest);
+        var salesId = response.body().jsonPath().get("salesId");
+
+        var salesResponse = given()
+                .get(urlForTests() + "/shows/sale/" + salesId);
+        salesResponse.then().body("salesIdentifier", is(salesId));
+        salesResponse.then().body("pointsWon", is(10));
+        salesResponse.then().body("userId", is(2));
+        salesResponse.then().body("movieId", is(2));
+        salesResponse.then().body("total", is(20.0F));
+        salesResponse.then().body("$", hasKey("showStartTime"));
+        salesResponse.then().body("seats", hasItems(11, 10));
+    }
+
+    @Test
     public void payReservedShowOk() throws JSONException {
         JSONArray seatsRequest = jsonBodyForReserveSeats(12, 13, 17);
         reservePost("2", seatsRequest, 1);

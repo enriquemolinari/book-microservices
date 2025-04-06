@@ -187,6 +187,31 @@ public class ShowsTest {
     }
 
     @Test
+    public void payedSeatsReturnSale() {
+        var fakePaymenentProvider = tests.fakePaymenentProvider();
+        var shows = new Shows(emf, fakePaymenentProvider, DateTimeProvider.create(), () -> "123-456-789");
+        var movieId = tests.createAMovie(shows, 1L);
+        long theaterId = createATheater(shows);
+        var showInfo = shows.addNewShowFor(movieId,
+                LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
+                        13, 30),
+                10f, theaterId, 20);
+        var joseId = registerUserJose(shows);
+        shows.reserve(joseId, showInfo.showId(), Set.of(1, 5));
+        var ticket = shows.pay(joseId, showInfo.showId(), Set.of(1, 5),
+                JOSEUSER_CREDIT_CARD_NUMBER,
+                JOSEUSER_CREDIT_CARD_EXPIRITY,
+                JOSEUSER_CREDIT_CARD_SEC_CODE);
+        var sale = shows.sale(ticket.getSalesId());
+        assertEquals(joseId, sale.userId());
+        assertEquals(movieId, sale.movieId());
+        assertEquals(20, sale.pointsWon());
+        assertEquals("Saturday 10/10 13:30", sale.showStartTime());
+        assertEquals(20F, sale.total());
+        assertTrue(sale.seats().containsAll(List.of(5, 1)));
+    }
+
+    @Test
     public void confirmAndPaySeats() {
         var fakePaymenentProvider = tests.fakePaymenentProvider();
         var shows = new Shows(emf, fakePaymenentProvider, DateTimeProvider.create(), () -> "123-456-789");

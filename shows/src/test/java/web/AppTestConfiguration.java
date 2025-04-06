@@ -17,7 +17,8 @@ public class AppTestConfiguration {
     @Bean
     public ShowsSubSystem createShows() {
         var emf = Persistence
-                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS);
+                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS,
+                        PersistenceUnit.connStrInMemoryProperties());
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         return new Shows(emf, doNothingPaymentProvider());
     }

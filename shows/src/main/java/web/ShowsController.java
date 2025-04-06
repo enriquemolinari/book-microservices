@@ -66,6 +66,11 @@ public class ShowsController {
         return ResponseEntity.ok(this.showsSubSystem.buyer(userId));
     }
 
+    @GetMapping("/shows/sale/{salesIdentifier}")
+    public ResponseEntity<SaleInfo> sale(@PathVariable String salesIdentifier) {
+        return ResponseEntity.ok(this.showsSubSystem.sale(salesIdentifier));
+    }
+
     private <S> S ifUserIdInHeaderDo(Long userId, Function<Long, S> method) {
         if (userId == null) {
             throw new ShowsAuthException(AUTHENTICATION_REQUIRED);

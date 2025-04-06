@@ -24,4 +24,7 @@ public interface ShowsSubSystem {
                String secturityCode);
 
     BuyerInfo buyer(Long userId);
+
+    SaleInfo sale(String salesIdentifier);
+
 }

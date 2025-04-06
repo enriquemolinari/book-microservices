@@ -96,12 +96,19 @@
             <version>1.18.36</version>
             <scope>compile</scope>
         </dependency>
-        
+
         <!-- JQueue -->
         <dependency>
             <groupId>io.github.enriquemolinari</groupId>
             <artifactId>jqueue</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.6</version>
+        </dependency>
+
+        <!-- RabbitMq Java Client -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.25.0</version>
         </dependency>
 
         <!-- tests -->

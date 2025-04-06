@@ -19,7 +19,6 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 
-import static model.PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ShowsTest {
@@ -34,7 +33,8 @@ public class ShowsTest {
 
     @BeforeEach
     public void setUp() {
-        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_SHOWS_MS);
+        emf = Persistence.createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS,
+                PersistenceUnit.connStrInMemoryProperties());
     }
 
     @Test

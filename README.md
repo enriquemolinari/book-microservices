@@ -40,3 +40,11 @@
 - To start the service: `./mvnw exec:java`. A sample users data is loaded at startup.
 - Once started, you can open swagger UI:
     - http://localhost:8093/swagger-ui/index.html
+
+### Rabbit MQ
+
+- `cd docker`
+- To start it: `docker compose -f rabbitmq-container.yml up -d`
+- Management tool: `http://localhost:15672`
+    - user/pwd: admin/1234
+- To stop it: `docker compose -f rabbitmq-container.yml down`

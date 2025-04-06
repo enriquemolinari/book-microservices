@@ -32,20 +32,10 @@
         <properties>
             <property name="javax.persistence.jdbc.driver"
                       value="org.apache.derby.jdbc.EmbeddedDriver"/>
-
-            <property name="javax.persistence.jdbc.url"
-                      value="jdbc:derby:memory:shows;create=true"/>
-
-            <property name="jakarta.persistence.jdbc.user" value="app"/>
-            <property name="jakarta.persistence.jdbc.password"
-                      value="app"/>
-
             <property name="hibernate.dialect"
                       value="org.hibernate.dialect.DerbyDialect"/>
-
             <property name="jakarta.persistence.create-database-schemas"
                       value="true"/>
-
             <property name="hibernate.hbm2ddl.auto" value="create"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="false"/>

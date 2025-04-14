@@ -17,6 +17,7 @@ public class PushToBrokerFromJQueueWorker {
     private final DbConnStr dbConnStr;
     private final EntityManagerFactory emf;
     private final Broker broker;
+    private ScheduledExecutorService scheduler;
 
     public PushToBrokerFromJQueueWorker(EntityManagerFactory emf,
                                         DbConnStr dbConnStr,
@@ -29,14 +30,13 @@ public class PushToBrokerFromJQueueWorker {
     public void startUp() {
         try {
             this.broker.startUp();
-            try (ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1)) {
-                scheduler.scheduleAtFixedRate(() -> {
-                    try (var em = this.emf.createEntityManager()) {
-                        Session session = em.unwrap(Session.class);
-                        session.doWork((c) -> executeJQueueRunner(this.broker));
-                    }
-                }, 0, 5, TimeUnit.SECONDS);
-            }
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(() -> {
+                try (var em = this.emf.createEntityManager()) {
+                    Session session = em.unwrap(Session.class);
+                    session.doWork((c) -> executeJQueueRunner(this.broker));
+                }
+            }, 0, 5, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -52,6 +52,7 @@ public class PushToBrokerFromJQueueWorker {
     }
 
     public void shutdown() {
+        this.scheduler.close();
         this.broker.shutdown();
     }
 }

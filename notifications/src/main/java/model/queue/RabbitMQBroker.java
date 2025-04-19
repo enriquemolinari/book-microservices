@@ -3,15 +3,15 @@ package model.queue;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import model.ShowSoldProcessor;
+import model.NewTicketSoldProcessor;
 import model.events.NewTicketSoldEvent;
 
 public class RabbitMQBroker implements Broker {
     public static final String ENCODING = "UTF-8";
     private final RabbitConnStr rabbitConnStr;
-    private final ShowSoldProcessor processor;
+    private final NewTicketSoldProcessor processor;
 
-    public RabbitMQBroker(RabbitConnStr rabbitConnStr, ShowSoldProcessor processor) {
+    public RabbitMQBroker(RabbitConnStr rabbitConnStr, NewTicketSoldProcessor processor) {
         this.rabbitConnStr = rabbitConnStr;
         this.processor = processor;
     }

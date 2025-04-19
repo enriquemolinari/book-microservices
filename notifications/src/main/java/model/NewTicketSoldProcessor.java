@@ -1,10 +1,10 @@
 package model;
 
-public class ShowSoldProcessor {
+public class NewTicketSoldProcessor {
     private final EmailProvider emailProvider;
     private final SaleInfoRequestor saleInfoRequestor;
 
-    public ShowSoldProcessor(EmailProvider emailProvider, SaleInfoRequestor saleInfoRequestor) {
+    public NewTicketSoldProcessor(EmailProvider emailProvider, SaleInfoRequestor saleInfoRequestor) {
         this.emailProvider = emailProvider;
         this.saleInfoRequestor = saleInfoRequestor;
     }

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-public class ShowSoldProcessorTest {
+public class NewTicketSoldProcessorTest {
     public static final String ENV_VALUE = "default";
     public static final int PORT_TEST = 8087;
     public static final String SALES_ID = "7f1ffef0-f0d4-4099-a368-d5e76c652a8b";
@@ -39,7 +39,7 @@ public class ShowSoldProcessorTest {
 
         var saleInfoRequestor = new SaleInfoRequestor(getUrl());
         String[] values = new String[3];
-        var showSoldProcessor = new ShowSoldProcessor(
+        var showSoldProcessor = new NewTicketSoldProcessor(
                 (emailTo, subject, body) -> {
                     values[0] = emailTo;
                     values[1] = subject;

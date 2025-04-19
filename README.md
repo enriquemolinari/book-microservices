@@ -41,6 +41,14 @@
 - Once started, you can open swagger UI:
     - http://localhost:8093/swagger-ui/index.html
 
+### Notifications Microservice
+
+- `cd notifications`
+- To compile and install all dependencies: `./mvnw install`
+- To run all service tests: `./mvnw test`
+- To start the service: `./mvnw exec:java`.
+    - It will start waiting for new events in `notifications.shows.events` queue.
+
 ### Rabbit MQ
 
 - `cd docker`

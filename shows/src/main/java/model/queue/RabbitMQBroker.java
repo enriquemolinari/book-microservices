@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class RabbitMq implements Broker {
+public class RabbitMQBroker implements Broker {
     public static final String CONTENT_TYPE = "application/json";
     private final RabbitConnStr rabbitConnStr;
     private Connection connection;
     private Channel channel;
 
-    public RabbitMq(RabbitConnStr rabbitConnStr) {
+    public RabbitMQBroker(RabbitConnStr rabbitConnStr) {
         this.rabbitConnStr = rabbitConnStr;
     }
 

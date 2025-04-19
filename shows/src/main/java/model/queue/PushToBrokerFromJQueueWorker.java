@@ -1,8 +1,6 @@
 package model.queue;
 
 import ar.cpfw.jqueue.runner.JQueueRunner;
-import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +13,11 @@ import static model.queue.JQueueTable.FULL_TABLE_NAME;
 public class PushToBrokerFromJQueueWorker {
     final Logger logger = LoggerFactory.getLogger(PushToBrokerFromJQueueWorker.class);
     private final DbConnStr dbConnStr;
-    private final EntityManagerFactory emf;
     private final Broker broker;
     private ScheduledExecutorService scheduler;
 
-    public PushToBrokerFromJQueueWorker(EntityManagerFactory emf,
-                                        DbConnStr dbConnStr,
+    public PushToBrokerFromJQueueWorker(DbConnStr dbConnStr,
                                         Broker broker) {
-        this.emf = emf;
         this.dbConnStr = dbConnStr;
         this.broker = broker;
     }
@@ -32,10 +27,7 @@ public class PushToBrokerFromJQueueWorker {
             this.broker.startUp();
             scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(() -> {
-                try (var em = this.emf.createEntityManager()) {
-                    Session session = em.unwrap(Session.class);
-                    session.doWork((c) -> executeJQueueRunner(this.broker));
-                }
+                executeJQueueRunner(this.broker);
             }, 0, 5, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);

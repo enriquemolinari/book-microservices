@@ -9,7 +9,7 @@ import model.Shows;
 import model.queue.DbConnStr;
 import model.queue.PushToBrokerFromJQueueWorker;
 import model.queue.RabbitConnStr;
-import model.queue.RabbitMq;
+import model.queue.RabbitMQBroker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,9 +36,9 @@ public class AppConfiguration {
                 createEntityManagerFactory(DERBY_EMBEDDED_SHOWS_MS,
                         PersistenceUnit.connStrInMemoryProperties());
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
-        pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(emf,
+        pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(JDBC_DERBY_MEMORY_SHOWS, USER, PWD),
-                new RabbitMq(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
+                new RabbitMQBroker(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
         pushToBrokerFromJQueueWorker.startUp();
         return new Shows(emf, doNothingPaymentProvider());
     }

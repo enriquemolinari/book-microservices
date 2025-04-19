@@ -32,7 +32,7 @@ public class RabbitMQBroker implements Broker {
                     var ticketSoldEvent = NewTicketSoldEvent.of(eventPayload);
                     this.processor.process(ticketSoldEvent.saleId());
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(),
-                            false /* confirm this eventPayload only */);
+                            false /* not muliple, confirm this eventPayload only */);
                 } catch (Exception e) {
                     channel.basicNack(delivery.getEnvelope().getDeliveryTag(),
                             false /* not multiple, just this one */,

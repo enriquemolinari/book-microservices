@@ -25,7 +25,7 @@ public class Main {
         var processor = new NewTicketSoldProcessor(
                 new TheBestEmailProvider(),
                 new SaleInfoRequestor(getUrl(config)));
-        new RabbitMQBroker(rabbitConn, processor).listen();
+        new RabbitMQBroker(rabbitConn, processor).listenForNewTickets();
     }
 
     private String getUrl(Config config) {

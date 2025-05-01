@@ -16,7 +16,7 @@ public class RabbitMQBroker implements Broker {
         this.processor = processor;
     }
 
-    public void listen() {
+    public void listenForNewTickets() {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(this.rabbitConnStr.host());
         factory.setUsername(this.rabbitConnStr.user());

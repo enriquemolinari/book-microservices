@@ -8,13 +8,7 @@
             <!-- Client Driver -->
             <property name="jakarta.persistence.jdbc.driver"
                       value="org.apache.derby.jdbc.ClientDriver"/>
-
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:derby://localhost:1527/shows;create=true"/>
-
-            <property name="jakarta.persistence.jdbc.user" value="app"/>
-            <property name="jakarta.persistence.jdbc.password" value="app"/>
-
+            
             <property name="hibernate.dialect"
                       value="org.hibernate.dialect.DerbyDialect"/>
 

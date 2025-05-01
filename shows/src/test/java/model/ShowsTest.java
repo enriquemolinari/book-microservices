@@ -34,7 +34,7 @@ public class ShowsTest {
     @BeforeEach
     public void setUp() {
         emf = Persistence.createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS,
-                PersistenceUnit.connStrInMemoryProperties());
+                PersistenceUnit.connStrProperties("jdbc:derby:memory:shows;create=true", "app", "app"));
     }
 
     @Test

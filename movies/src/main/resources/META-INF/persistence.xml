@@ -9,12 +9,6 @@
             <property name="jakarta.persistence.jdbc.driver"
                       value="org.apache.derby.jdbc.ClientDriver"/>
 
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:derby://localhost:1527/movies;create=true"/>
-
-            <property name="jakarta.persistence.jdbc.user" value="app"/>
-            <property name="jakarta.persistence.jdbc.password" value="app"/>
-
             <property name="hibernate.dialect"
                       value="org.hibernate.dialect.DerbyDialect"/>
 
@@ -32,14 +26,7 @@
         <properties>
             <property name="javax.persistence.jdbc.driver"
                       value="org.apache.derby.jdbc.EmbeddedDriver"/>
-
-            <property name="javax.persistence.jdbc.url"
-                      value="jdbc:derby:memory:movies;create=true"/>
-
-            <property name="jakarta.persistence.jdbc.user" value="app"/>
-            <property name="jakarta.persistence.jdbc.password"
-                      value="app"/>
-
+            
             <property name="hibernate.dialect"
                       value="org.hibernate.dialect.DerbyDialect"/>
 

@@ -42,7 +42,8 @@ public class MoviesTest {
 
     @BeforeEach
     public void setUp() {
-        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_MOVIES_MS);
+        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_MOVIES_MS,
+                PersistenceUnit.connStrProperties("jdbc:derby:memory:movies;create=true", "app", "app"));
     }
 
     @Test

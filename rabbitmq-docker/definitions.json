@@ -74,23 +74,23 @@
       }
     },
     {
-      "name": "users.shows.events",
+      "name": "shows.users.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "dlq.users.shows.events"
+        "x-dead-letter-routing-key": "dlq.shows.users.events"
       }
     },
     {
-      "name": "users.movies.events",
+      "name": "movies.users.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "dlq.users.movies.events"
+        "x-dead-letter-routing-key": "dlq.movies.users.events"
       }
     },
     {
@@ -108,14 +108,14 @@
       "arguments": {}
     },
     {
-      "name": "dlq.users.shows.events",
+      "name": "dlq.shows.movies.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {}
     },
     {
-      "name": "dlq.users.movies.events",
+      "name": "dlq.movies.users.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
@@ -171,7 +171,7 @@
     {
       "source": "users.events",
       "vhost": "/",
-      "destination": "users.shows.events",
+      "destination": "shows.users.events",
       "destination_type": "queue",
       "routing_key": "",
       "arguments": {}
@@ -179,7 +179,7 @@
     {
       "source": "users.events",
       "vhost": "/",
-      "destination": "users.movies.events",
+      "destination": "movies.users.events",
       "destination_type": "queue",
       "routing_key": "",
       "arguments": {}

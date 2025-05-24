@@ -3,20 +3,22 @@ package model.queue;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import model.NewTicketSoldProcessor;
-import model.events.NewTicketSoldEvent;
+import model.UserCreator;
+import model.events.consume.NewUserEvent;
 
-public class RabbitMQListener implements Broker {
+public class RabbitMQConsumer implements Consumer {
     public static final String ENCODING = "UTF-8";
     private final RabbitConnStr rabbitConnStr;
-    private final NewTicketSoldProcessor processor;
+    private final UserCreator creator;
+    private final String queueName;
 
-    public RabbitMQListener(RabbitConnStr rabbitConnStr, NewTicketSoldProcessor processor) {
+    public RabbitMQConsumer(RabbitConnStr rabbitConnStr, UserCreator creator, String queueName) {
         this.rabbitConnStr = rabbitConnStr;
-        this.processor = processor;
+        this.creator = creator;
+        this.queueName = queueName;
     }
 
-    public void listenForNewTickets() {
+    public void listenForNewUsers() {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(this.rabbitConnStr.host());
         factory.setUsername(this.rabbitConnStr.user());
@@ -25,12 +27,12 @@ public class RabbitMQListener implements Broker {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
             // here is waiting for new messages
-            channel.basicConsume(this.rabbitConnStr.queueName(), false, (consumerTag, delivery) -> {
+            channel.basicConsume(this.queueName, false, (consumerTag, delivery) -> {
                 try {
                     String eventPayload = new String(delivery.getBody(), ENCODING);
                     // do process
-                    var ticketSoldEvent = NewTicketSoldEvent.of(eventPayload);
-                    this.processor.process(ticketSoldEvent.saleId());
+                    var newUserEvent = NewUserEvent.of(eventPayload);
+                    this.creator.newUser(newUserEvent.userId());
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(),
                             false /* not muliple, confirm this eventPayload only */);
                 } catch (Exception e) {

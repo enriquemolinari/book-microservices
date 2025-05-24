@@ -6,7 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
-import model.events.NewMovieEvent;
+import model.events.publish.NewMovieEvent;
 import model.queue.JQueueInTxtQueue;
 import model.queue.JQueueTable;
 

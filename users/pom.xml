@@ -133,6 +133,13 @@
             <version>0.0.6</version>
         </dependency>
 
+        <!-- RabbitMq Java Client -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.25.0</version>
+        </dependency>
+
         <!-- tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

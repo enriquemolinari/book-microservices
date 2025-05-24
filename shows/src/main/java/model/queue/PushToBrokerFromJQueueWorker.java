@@ -13,38 +13,38 @@ import static model.queue.JQueueTable.FULL_TABLE_NAME;
 public class PushToBrokerFromJQueueWorker {
     final Logger logger = LoggerFactory.getLogger(PushToBrokerFromJQueueWorker.class);
     private final DbConnStr dbConnStr;
-    private final Broker broker;
+    private final Publisher publisher;
     private ScheduledExecutorService scheduler;
 
     public PushToBrokerFromJQueueWorker(DbConnStr dbConnStr,
-                                        Broker broker) {
+                                        Publisher publisher) {
         this.dbConnStr = dbConnStr;
-        this.broker = broker;
+        this.publisher = publisher;
     }
 
     public void startUpSchedule() {
         try {
-            this.broker.startUp();
+            this.publisher.startUp();
             scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(() -> {
-                executeJQueueRunner(this.broker);
+                executeJQueueRunner(this.publisher);
             }, 0, 5, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void executeJQueueRunner(Broker broker) {
+    private void executeJQueueRunner(Publisher publisher) {
         logger.info("executing jqueue runner");
         JQueueRunner.runner(dbConnStr.url(), dbConnStr.user(), dbConnStr.password(), FULL_TABLE_NAME)
                 .executeAll(data -> {
                     logger.info("pushing into rabbitmq: {}", data);
-                    broker.push(data);
+                    publisher.push(data);
                 });
     }
 
     public void shutdown() {
         this.scheduler.close();
-        this.broker.shutdown();
+        this.publisher.shutdown();
     }
 }

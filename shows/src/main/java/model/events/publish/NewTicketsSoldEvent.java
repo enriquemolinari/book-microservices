@@ -1,4 +1,4 @@
-package model.events;
+package model.events.publish;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

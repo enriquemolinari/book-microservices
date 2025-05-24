@@ -18,6 +18,8 @@ import static model.queue.JQueueTable.JQUEUE_TABLE_NAME;
 @Getter(value = AccessLevel.PUBLIC)
 public class JQueueTable {
     static final String JQUEUE_TABLE_NAME = "jqueue";
+    static final String FULL_TABLE_NAME = DATABASE_SCHEMA_NAME + "." + JQUEUE_TABLE_NAME;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

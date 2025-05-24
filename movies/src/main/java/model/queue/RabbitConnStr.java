@@ -1,6 +1,4 @@
 package model.queue;
 
-public record RabbitConnStr(String host, String user, String password,
-                            String exchangeName) {
-
+public record RabbitConnStr(String host, String user, String password) {
 }

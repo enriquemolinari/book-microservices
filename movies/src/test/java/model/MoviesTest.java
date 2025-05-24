@@ -6,7 +6,7 @@ import api.MovieInfo;
 import api.MoviesException;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import model.events.NewMovieEvent;
+import model.events.publish.NewMovieEvent;
 import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

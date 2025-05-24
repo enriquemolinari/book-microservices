@@ -1,5 +1,5 @@
 package model.queue;
 
-public interface Broker {
+public interface Consumer {
     void listenForNewTickets();
 }

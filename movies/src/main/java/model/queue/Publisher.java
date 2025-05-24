@@ -1,6 +1,6 @@
 package model.queue;
 
-public interface Broker {
+public interface Publisher {
     void startUp();
 
     void push(String data);

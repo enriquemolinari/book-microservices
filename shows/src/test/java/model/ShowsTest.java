@@ -7,7 +7,7 @@ import api.ShowsSubSystem;
 import common.DateTimeProvider;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import model.events.NewTicketsSoldEvent;
+import model.events.publish.NewTicketsSoldEvent;
 import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

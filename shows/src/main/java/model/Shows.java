@@ -5,7 +5,7 @@ import common.DateTimeProvider;
 import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import model.events.NewTicketsSoldEvent;
+import model.events.publish.NewTicketsSoldEvent;
 import model.queue.JQueueInTxtQueue;
 import model.queue.JQueueTable;
 

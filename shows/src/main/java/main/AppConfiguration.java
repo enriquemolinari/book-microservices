@@ -9,7 +9,7 @@ import model.Shows;
 import model.queue.DbConnStr;
 import model.queue.PushToBrokerFromJQueueWorker;
 import model.queue.RabbitConnStr;
-import model.queue.RabbitMQBroker;
+import model.queue.RabbitMQPublisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +45,7 @@ public class AppConfiguration {
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),
-                new RabbitMQBroker(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
+                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
         pushToBrokerFromJQueueWorker.startUpSchedule();
         return new Shows(emf, doNothingPaymentProvider());
     }

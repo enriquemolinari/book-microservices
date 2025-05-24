@@ -22,7 +22,7 @@ public class PushToBrokerFromJQueueWorker {
         this.broker = broker;
     }
 
-    public void startUp() {
+    public void startUpSchedule() {
         try {
             this.broker.startUp();
             scheduler = Executors.newScheduledThreadPool(1);

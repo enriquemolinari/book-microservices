@@ -4,10 +4,10 @@ import model.NewTicketSoldProcessor;
 import model.SaleInfoRequestor;
 import model.TheBestEmailProvider;
 import model.queue.RabbitConnStr;
-import model.queue.RabbitMQBroker;
+import model.queue.RabbitMQListener;
 
 public class Main {
-    private Config config;
+    private final Config config;
 
     public Main() {
         config = new Config("default");
@@ -25,7 +25,7 @@ public class Main {
         var processor = new NewTicketSoldProcessor(
                 new TheBestEmailProvider(),
                 new SaleInfoRequestor(getUrl(config)));
-        new RabbitMQBroker(rabbitConn, processor).listenForNewTickets();
+        new RabbitMQListener(rabbitConn, processor).listenForNewTickets();
     }
 
     private String getUrl(Config config) {

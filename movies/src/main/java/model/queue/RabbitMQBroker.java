@@ -41,8 +41,8 @@ public class RabbitMQBroker implements Broker {
                     .deliveryMode(2) // persistente
                     .build();
             channel.basicPublish(
-                    this.rabbitConnStr.exchangeName(),           // exchange
-                    "",                      // routing key (vacío si fanout)
+                    this.rabbitConnStr.exchangeName(),
+                    "",
                     props,
                     body
             );

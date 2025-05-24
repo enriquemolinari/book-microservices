@@ -6,12 +6,12 @@ import com.rabbitmq.client.ConnectionFactory;
 import model.NewTicketSoldProcessor;
 import model.events.NewTicketSoldEvent;
 
-public class RabbitMQBroker implements Broker {
+public class RabbitMQListener implements Broker {
     public static final String ENCODING = "UTF-8";
     private final RabbitConnStr rabbitConnStr;
     private final NewTicketSoldProcessor processor;
 
-    public RabbitMQBroker(RabbitConnStr rabbitConnStr, NewTicketSoldProcessor processor) {
+    public RabbitMQListener(RabbitConnStr rabbitConnStr, NewTicketSoldProcessor processor) {
         this.rabbitConnStr = rabbitConnStr;
         this.processor = processor;
     }

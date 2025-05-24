@@ -46,7 +46,7 @@ public class AppConfiguration {
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),
                 new RabbitMQBroker(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
-        pushToBrokerFromJQueueWorker.startUp();
+        pushToBrokerFromJQueueWorker.startUpSchedule();
         return new Shows(emf, doNothingPaymentProvider());
     }
 

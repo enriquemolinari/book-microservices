@@ -3,13 +3,11 @@ package main;
 import api.ShowsSubSystem;
 import jakarta.annotation.PreDestroy;
 import jakarta.persistence.Persistence;
+import model.BuyerCreator;
 import model.CreditCardPaymentProvider;
 import model.PersistenceUnit;
 import model.Shows;
-import model.queue.DbConnStr;
-import model.queue.PushToBrokerFromJQueueWorker;
-import model.queue.RabbitConnStr;
-import model.queue.RabbitMQPublisher;
+import model.queue.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +20,8 @@ import static model.PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS;
 public class AppConfiguration {
     @Value("${queue.rabbimq.exchange.name}")
     private String EXCHANGE_NAME;
+    @Value("${queue.rabbimq.newuser.queue.name}")
+    private String QUEUE_NAME;
     @Value("${queue.rabbitmq.host}")
     private String RABBITHOST;
     @Value("${queue.rabbitmq.username}")
@@ -47,6 +47,12 @@ public class AppConfiguration {
                 new DbConnStr(dbUrl, dbUser, dbPassword),
                 new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD), EXCHANGE_NAME));
         pushToBrokerFromJQueueWorker.startUpSchedule();
+
+        new RabbitMQConsumer(
+                new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD),
+                new BuyerCreator(emf),
+                QUEUE_NAME).listenForNewUsers();
+
         return new Shows(emf, doNothingPaymentProvider());
     }
 

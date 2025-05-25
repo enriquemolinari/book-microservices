@@ -101,7 +101,7 @@
       "arguments": {}
     },
     {
-      "name": "dlq.shows.movies.events",
+      "name": "dlq.shows.users.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,

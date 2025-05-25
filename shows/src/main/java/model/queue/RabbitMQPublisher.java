@@ -9,11 +9,13 @@ import java.util.concurrent.TimeoutException;
 public class RabbitMQPublisher implements Publisher {
     public static final String CONTENT_TYPE = "application/json";
     private final RabbitConnStr rabbitConnStr;
+    private final String exchangeName;
     private Connection connection;
     private Channel channel;
 
-    public RabbitMQPublisher(RabbitConnStr rabbitConnStr) {
+    public RabbitMQPublisher(RabbitConnStr rabbitConnStr, String exchangeName) {
         this.rabbitConnStr = rabbitConnStr;
+        this.exchangeName = exchangeName;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class RabbitMQPublisher implements Publisher {
             factory.setPassword(rabbitConnStr.password());
             this.connection = factory.newConnection();
             this.channel = connection.createChannel();
-            channel.exchangeDeclare(rabbitConnStr.exchangeName(), BuiltinExchangeType.FANOUT, true);
+            channel.exchangeDeclare(this.exchangeName, BuiltinExchangeType.FANOUT, true);
             channel.confirmSelect();
         } catch (IOException | TimeoutException e) {
             throw new RuntimeException(e);
@@ -41,7 +43,7 @@ public class RabbitMQPublisher implements Publisher {
                     .deliveryMode(2) // persistente
                     .build();
             channel.basicPublish(
-                    this.rabbitConnStr.exchangeName(),           // exchange
+                    this.exchangeName,           // exchange
                     "",                      // routing key (vacío si fanout)
                     props,
                     body

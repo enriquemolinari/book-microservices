@@ -45,7 +45,7 @@ public class AppConfiguration {
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),
-                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
+                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD), EXCHANGE_NAME));
         pushToBrokerFromJQueueWorker.startUpSchedule();
         return new Shows(emf, doNothingPaymentProvider());
     }

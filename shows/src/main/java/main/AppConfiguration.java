@@ -2,9 +2,10 @@ package main;
 
 import api.ShowsSubSystem;
 import jakarta.annotation.PreDestroy;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import model.BuyerCreator;
 import model.CreditCardPaymentProvider;
+import model.EntityCreator;
 import model.PersistenceUnit;
 import model.Shows;
 import model.queue.*;
@@ -21,7 +22,9 @@ public class AppConfiguration {
     @Value("${queue.rabbimq.exchange.name}")
     private String EXCHANGE_NAME;
     @Value("${queue.rabbimq.newuser.queue.name}")
-    private String QUEUE_NAME;
+    private String QUEUE_NAME_NEWUSER;
+    @Value("${queue.rabbimq.newmovie.queue.name}")
+    private String QUEUE_NAME_NEWMOVIE;
     @Value("${queue.rabbitmq.host}")
     private String RABBITHOST;
     @Value("${queue.rabbitmq.username}")
@@ -43,17 +46,28 @@ public class AppConfiguration {
                 createEntityManagerFactory(DERBY_EMBEDDED_SHOWS_MS,
                         PersistenceUnit.connStrProperties(dbUrl, dbUser, dbPassword));
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
+
+        startUpPublisherWorkerFromJQueueToRabbit();
+
+        startUpConsumerWorker(emf);
+
+        return new Shows(emf, doNothingPaymentProvider());
+    }
+
+    private void startUpConsumerWorker(EntityManagerFactory emf) {
+        var rabbitMQConsumer = new RabbitMQConsumer(
+                new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD),
+                new EntityCreator(emf),
+                QUEUE_NAME_NEWUSER, QUEUE_NAME_NEWMOVIE);
+        rabbitMQConsumer.listenForNewUsers();
+        rabbitMQConsumer.listenForNewMovies();
+    }
+
+    private void startUpPublisherWorkerFromJQueueToRabbit() {
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),
                 new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD), EXCHANGE_NAME));
         pushToBrokerFromJQueueWorker.startUpSchedule();
-
-        new RabbitMQConsumer(
-                new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD),
-                new BuyerCreator(emf),
-                QUEUE_NAME).listenForNewUsers();
-
-        return new Shows(emf, doNothingPaymentProvider());
     }
 
     private CreditCardPaymentProvider doNothingPaymentProvider() {

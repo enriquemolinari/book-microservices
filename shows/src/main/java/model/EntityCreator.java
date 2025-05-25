@@ -3,17 +3,16 @@ package model;
 import common.Tx;
 import jakarta.persistence.EntityManagerFactory;
 
-public class BuyerCreator {
+public class EntityCreator {
     private final EntityManagerFactory emf;
 
-    public BuyerCreator(EntityManagerFactory emf) {
+    public EntityCreator(EntityManagerFactory emf) {
         this.emf = emf;
     }
 
-    public void newUser(long userId) {
+    public void persist(Object entity) {
         new Tx(this.emf).inTx(em -> {
-            em.persist(new Buyer(userId));
+            em.persist(entity);
         });
     }
-
 }

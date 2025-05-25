@@ -1,8 +1,8 @@
 package main;
 
+import model.MailPitEmailProvider;
 import model.NewTicketSoldProcessor;
 import model.SaleInfoRequestor;
-import model.TheBestEmailProvider;
 import model.queue.RabbitConnStr;
 import model.queue.RabbitMQConsumer;
 
@@ -23,7 +23,7 @@ public class Main {
                 , config.rabbitMQPassword()
                 , config.queueName());
         var processor = new NewTicketSoldProcessor(
-                new TheBestEmailProvider(),
+                new MailPitEmailProvider(config.mailPitHost(), config.mailPitPort(), config.mailPitEmailFrom()),
                 new SaleInfoRequestor(getUrl(config)));
         new RabbitMQConsumer(rabbitConn, processor).listenForNewTickets();
     }

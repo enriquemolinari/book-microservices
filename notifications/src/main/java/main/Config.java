@@ -57,6 +57,18 @@ public class Config {
         return properties.getProperty("queue.rabbitmq.password");
     }
 
+    public String mailPitHost() {
+        return properties.getProperty("mailpit.host");
+    }
+
+    public String mailPitPort() {
+        return properties.getProperty("mailpit.smtp.port");
+    }
+
+    public String mailPitEmailFrom() {
+        return properties.getProperty("mailpit.from");
+    }
+
     private void loadPropertiesFile() {
         try (InputStream input = getClass()
                 .getClassLoader()

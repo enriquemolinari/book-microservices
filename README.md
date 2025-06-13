@@ -59,3 +59,11 @@
 - Management tool: `http://localhost:15672`
     - user/pwd: admin/1234
 - To stop it: `docker compose -f rabbitmq-container.yml down`
+
+### Smoke Tests
+
+- In order to run smoke tests, you need to have all services running. Which are:
+    - All services from this repository.
+    - And the [API Compition](https://github.com/enriquemolinari/book-apicomposition) service.
+- cd `smoke-tests`
+- To run tests: `./mvnw test`

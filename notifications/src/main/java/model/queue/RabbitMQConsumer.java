@@ -5,9 +5,12 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import model.NewTicketSoldProcessor;
 import model.events.NewTicketSoldEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RabbitMQConsumer implements Consumer {
     public static final String ENCODING = "UTF-8";
+    final Logger logger = LoggerFactory.getLogger(RabbitMQConsumer.class);
     private final RabbitConnStr rabbitConnStr;
     private final NewTicketSoldProcessor processor;
 
@@ -28,7 +31,7 @@ public class RabbitMQConsumer implements Consumer {
             channel.basicConsume(this.rabbitConnStr.queueName(), false, (consumerTag, delivery) -> {
                 try {
                     String eventPayload = new String(delivery.getBody(), ENCODING);
-                    // do process
+                    // d|o process
                     var ticketSoldEvent = NewTicketSoldEvent.of(eventPayload);
                     this.processor.process(ticketSoldEvent.saleId());
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(),
@@ -37,6 +40,7 @@ public class RabbitMQConsumer implements Consumer {
                     channel.basicNack(delivery.getEnvelope().getDeliveryTag(),
                             false /* not multiple, just this one */,
                             false /* not requeue, move to dlq */);
+                    logger.error("Consuming from {} failed", this.rabbitConnStr.queueName(), e);
                 }
             }, consumerTag -> {
             });

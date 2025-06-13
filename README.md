@@ -48,7 +48,7 @@
 - To run all service tests: `./mvnw test`
 - To start the service:
     - Start mailpit server: `docker compose -f mailpit/docker-compose.yml up -d`
-        - Emails will be sent to: http://localhost:8025.
+        - Email Web Console will be available at: http://localhost:8025.
     - Then `./mvnw exec:java`.
         - It will start waiting for new events in `notifications.shows.events` queue.
 

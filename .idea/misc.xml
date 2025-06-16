@@ -33,6 +33,7 @@
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/api-composer/pom.xml" />
+        <option value="$PROJECT_DIR$/integration-tests/pom.xml" />
         <option value="$PROJECT_DIR$/main-api-composer/pom.xml" />
         <option value="$PROJECT_DIR$/movies-request-participant/pom.xml" />
         <option value="$PROJECT_DIR$/shows-request-participant/pom.xml" />

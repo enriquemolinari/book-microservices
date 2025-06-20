@@ -108,6 +108,35 @@ public class ShowsTest {
     }
 
     @Test
+    public void testMovieShowByMovieIdWithTwoShows() {
+        var shows = createShowsSubSystem(DateTimeProvider.create());
+        var movieId = tests.createAMovie(shows, 1L);
+        long theaterId = createATheater(shows);
+        shows.addNewShowFor(movieId,
+                LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
+                        13, 30),
+                10f, theaterId, 20);
+        shows.addNewShowFor(movieId,
+                LocalDateTime.of(LocalDate.now().plusYears(2).getYear(),
+                        5, 10,
+                        13, 30),
+                10f, theaterId, 20);
+        var movieShows = shows.movieShowsBy(movieId);
+        assertEquals(1L, movieShows.movieId());
+        assertEquals(2, movieShows.shows().size());
+        assertEquals(10f, movieShows.shows().getFirst().price());
+    }
+
+    @Test
+    public void testMovieShowByMovieIdZeroShows() {
+        var shows = createShowsSubSystem(DateTimeProvider.create());
+        var movieId = tests.createAMovie(shows, 1L);
+        var movieShows = shows.movieShowsBy(movieId);
+        assertEquals(1L, movieShows.movieId());
+        assertEquals(0, movieShows.shows().size());
+    }
+
+    @Test
     public void aShowIsPlayingAt() {
         var shows = createShowsSubSystem(DateTimeProvider.create());
         var movieId = tests.createAMovie(shows, 1L);

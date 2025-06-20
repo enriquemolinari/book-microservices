@@ -87,6 +87,13 @@ public class ShowsControllerTest {
     }
 
     @Test
+    public void testMovieShowsByMovieId() {
+        var response = get(urlForTests() + "/movie/" + SMALL_FISH_MOVIE_ID);
+        response.then().body(SHOW_MOVIE_ID_KEY, is(SMALL_FISH_MOVIE_ID));
+        response.then().body("shows", hasSize(2));
+    }
+
+    @Test
     public void reserveAlreadyReservedShowFail() {
         JSONArray seatsRequest = jsonBodyForReserveSeats(7);
         reservePost("2", seatsRequest, 1);

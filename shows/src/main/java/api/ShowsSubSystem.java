@@ -27,4 +27,5 @@ public interface ShowsSubSystem {
 
     SaleInfo sale(String salesIdentifier);
 
+    MovieShows movieShowsBy(Long movieId);
 }

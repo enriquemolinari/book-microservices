@@ -71,6 +71,7 @@ public class Shows implements ShowsSubSystem {
     public ShowInfo addNewShowFor(Long movieId, LocalDateTime startTime,
                                   float price, Long theaterId, int pointsToWin) {
         return new Tx(emf).inTx(em -> {
+            //this method is not validating that shows are not overlapping
             var movie = movieBy(movieId, em);
             var theatre = theatreBy(theaterId, em);
             var showTime = new ShowTime(movie, startTime, price, theatre,
@@ -120,6 +121,13 @@ public class Shows implements ShowsSubSystem {
             }
             Sale first = list.getFirst();
             return first.saleInfo();
+        });
+    }
+
+    @Override
+    public MovieShows movieShowsBy(Long movieId) {
+        return new Tx(emf).inTx(em -> {
+            return this.movieBy(movieId, em).toMovieShow();
         });
     }
 

@@ -14,6 +14,14 @@
     - It uses [MockServer](https://www.mock-server.com/) to mock services
 - To start the service: `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`
 
+### Rabbit MQ
+
+- `cd rabbitmq-docker`
+- To start it: `docker compose -f rabbitmq-container.yml up -d`
+- Management tool: `http://localhost:15672`
+    - user/pwd: admin/1234
+- To stop it: `docker compose -f rabbitmq-container.yml down`
+
 ### Movies Microservice
 
 - `cd movies`
@@ -51,11 +59,3 @@
         - Email Web Console will be available at: http://localhost:8025.
     - Then `./mvnw exec:java`.
         - It will start waiting for new events in `notifications.shows.events` queue.
-
-### Rabbit MQ
-
-- `cd docker`
-- To start it: `docker compose -f rabbitmq-container.yml up -d`
-- Management tool: `http://localhost:15672`
-    - user/pwd: admin/1234
-- To stop it: `docker compose -f rabbitmq-container.yml down`

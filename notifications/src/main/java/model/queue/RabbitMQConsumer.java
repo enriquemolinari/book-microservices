@@ -21,6 +21,8 @@ public class RabbitMQConsumer implements Consumer {
 
     public void listenForNewTickets() {
         ConnectionFactory factory = new ConnectionFactory();
+        factory.setAutomaticRecoveryEnabled(true);
+        factory.setNetworkRecoveryInterval(10000);
         factory.setHost(this.rabbitConnStr.host());
         factory.setUsername(this.rabbitConnStr.user());
         factory.setPassword(this.rabbitConnStr.password());

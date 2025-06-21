@@ -33,7 +33,7 @@ public class ShowsController {
         return ResponseEntity.ok(showsSubSystem.show(id));
     }
 
-    @GetMapping("/movie/{id}")
+    @GetMapping("/shows/movie/{id}")
     public ResponseEntity<MovieShows> movieShowsByMovieId(
             @PathVariable Long id) {
         return ResponseEntity.ok(showsSubSystem.movieShowsBy(id));

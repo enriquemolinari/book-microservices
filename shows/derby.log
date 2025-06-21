@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Fri Jun 20 09:09:18 GMT-03:00 2025:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.17.1.0 - (1913217): instance a816c00e-0197-8d3e-488b-000002a02a08 
-on database directory memory:/home/enrique/git/book-microservices/shows/shows with class loader org.codehaus.mojo.exec.URLClassLoaderBuilder$ExecJavaClassLoader@28237492 
+Fri Jun 20 22:46:31 GMT-03:00 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.17.1.0 - (1913217): instance a816c00e-0197-902a-73d3-000002b43290 
+on database directory memory:/home/enrique/git/book-microservices/shows/shows with class loader org.codehaus.mojo.exec.URLClassLoaderBuilder$ExecJavaClassLoader@31e130bf 
 Loaded from file:/home/enrique/.m2/repository/org/apache/derby/derby/10.17.1.0/derby-10.17.1.0.jar
 java.vendor=Oracle Corporation
 java.runtime.version=23.0.1+11-39

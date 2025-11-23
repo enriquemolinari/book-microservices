@@ -140,7 +140,7 @@ public class ShowsControllerTest {
         var salesId = response.body().jsonPath().get("salesId");
 
         var salesResponse = given()
-                .get(urlForTests() + "/shows/sale/" + salesId);
+                .get(urlForTests() + "/shows/sales/" + salesId);
         salesResponse.then().body("salesIdentifier", is(salesId));
         salesResponse.then().body("pointsWon", is(10));
         salesResponse.then().body("userId", is(2));

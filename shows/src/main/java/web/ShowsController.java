@@ -72,7 +72,7 @@ public class ShowsController {
         return ResponseEntity.ok(this.showsSubSystem.buyer(userId));
     }
 
-    @GetMapping("/shows/sale/{salesIdentifier}")
+    @GetMapping("/shows/sales/{salesIdentifier}")
     public ResponseEntity<SaleInfo> sale(@PathVariable String salesIdentifier) {
         return ResponseEntity.ok(this.showsSubSystem.sale(salesIdentifier));
     }

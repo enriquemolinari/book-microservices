@@ -94,8 +94,8 @@ public class ShowsTest {
                 LocalDateTime.now().plusDays(4), 30f, theaterId, 30);
         var movieShows = shows
                 .showsUntil(
-                        LocalDateTime.of(LocalDate.now().plusDays(5).getYear(),
-                                10, 10, 13, 31));
+                        LocalDateTime.of(LocalDate.now().getYear(),
+                                LocalDate.now().plusDays(5).getMonth(), LocalDate.now().plusDays(5).getDayOfMonth(), 13, 31));
         assertEquals(2, movieShows.size());
         MovieShows movieOne = movieShows.stream().filter(m -> m.movieId().equals(1L)).toList().getFirst();
         MovieShows movieTwo = movieShows.stream().filter(m -> m.movieId().equals(2L)).toList().getFirst();

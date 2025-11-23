@@ -46,7 +46,7 @@ public class ShowsControllerTest {
 
     @Test
     public void playingNowShowsOk() {
-        var response = get(urlForTests() + "/shows");
+        var response = get(urlForTests() + Routes.SHOWS);
         response.then().statusCode(200).body(SHOW_MOVIE_ID_KEY,
                 hasItems(1, 2, 3, 4));
         response.then().body("find { it.movieId == 1 }.shows", hasSize(2));
@@ -59,7 +59,7 @@ public class ShowsControllerTest {
 
     @Test
     public void showOneOk() {
-        var response = get(urlForTests() + "/shows/1");
+        var response = get(urlForTests() + Routes.SHOW_BY_ID.replace(Routes.ID, "1"));
         response.then().body("info." + SHOW_MOVIE_ID_KEY, is(SMALL_FISH_MOVIE_ID));
         response.then().body("info.showId", is(1));
         response.then().body(JSON_ROOT, hasKey(CURRENT_SEATS_KEY));
@@ -71,7 +71,7 @@ public class ShowsControllerTest {
     public void buyerById() {
         var response = given()
                 .header(FW_GATEWAY_USER_ID, "1")
-                .get(urlForTests() + "/shows/buyer");
+                .get(urlForTests() + Routes.SHOWS_BUYER);
         response.then().body("buyerId", is(1));
         response.then().body("points", is(0));
     }
@@ -81,14 +81,15 @@ public class ShowsControllerTest {
         JSONArray seatsRequest = jsonBodyForReserveSeats(5, 7, 9);
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(seatsRequest.toString())
-                .post(urlForTests() + "/shows/private/1/reserve");
+                .post(urlForTests() + Routes.SHOWS_PRIVATE_RESERVE.replace(Routes.SHOW_ID, "1"));
         response.then().body(ERROR_MESSAGE_KEY,
                 is(ShowsController.AUTHENTICATION_REQUIRED));
     }
 
     @Test
     public void testMovieShowsByMovieId() {
-        var response = get(urlForTests() + "/shows/movie/" + SMALL_FISH_MOVIE_ID);
+        var response = get(urlForTests() + Routes.SHOWS_BY_MOVIE_ID.replace(Routes.ID,
+                String.valueOf(SMALL_FISH_MOVIE_ID)));
         response.then().body(SHOW_MOVIE_ID_KEY, is(SMALL_FISH_MOVIE_ID));
         response.then().body("shows", hasSize(2));
     }
@@ -113,7 +114,7 @@ public class ShowsControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(paymentRequest.toString())
-                .post(urlForTests() + "/shows/private/1/pay");
+                .post(urlForTests() + Routes.SHOWS_PRIVATE_PAY.replace(Routes.SHOW_ID, "1"));
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(ShowsController.AUTHENTICATION_REQUIRED));
@@ -140,7 +141,8 @@ public class ShowsControllerTest {
         var salesId = response.body().jsonPath().get("salesId");
 
         var salesResponse = given()
-                .get(urlForTests() + "/shows/sales/" + salesId);
+                .get(urlForTests() + Routes.SHOWS_SALES_BY_IDENTIFIER.replace(Routes.SALES_IDENTIFIER,
+                        salesId.toString()));
         salesResponse.then().body("salesIdentifier", is(salesId));
         salesResponse.then().body("pointsWon", is(10));
         salesResponse.then().body("userId", is(2));
@@ -212,14 +214,15 @@ public class ShowsControllerTest {
         return given().contentType(JSON_CONTENT_TYPE)
                 .header(FW_GATEWAY_USER_ID, "2")
                 .body(paymentRequest.toString())
-                .post(urlForTests() + "/shows/private/" + 1 + "/pay");
+                .post(urlForTests() + Routes.SHOWS_PRIVATE_PAY.replace(Routes.SHOW_ID, "1"));
     }
 
     private Response reservePost(String userId, JSONArray seatsRequest, int showId) {
         return given().contentType(JSON_CONTENT_TYPE)
                 .header(FW_GATEWAY_USER_ID, userId)
                 .body(seatsRequest.toString())
-                .post(urlForTests() + "/shows/private/" + showId + "/reserve");
+                .post(urlForTests() + Routes.SHOWS_PRIVATE_RESERVE.replace(Routes.SHOW_ID,
+                        String.valueOf(showId)));
     }
 
     private JSONArray jsonBodyForReserveSeats(Integer... seats) {

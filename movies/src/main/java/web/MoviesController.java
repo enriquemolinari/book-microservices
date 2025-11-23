@@ -21,18 +21,18 @@ public class MoviesController {
         this.moviesSubSystem = moviesSubSystem;
     }
 
-    @GetMapping("/movies/{id}")
+    @GetMapping(Routes.MOVIES_BY_ID)
     public ResponseEntity<DetailedMovieInfo> movieDetail(@PathVariable Long id) {
         return ResponseEntity.ok(moviesSubSystem.movie(id));
     }
 
-    @GetMapping("/movies/sorted/rate")
+    @GetMapping(Routes.MOVIES_SORTED_RATE)
     public ResponseEntity<List<DetailedMovieInfo>> moviesSortedByRate(
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedMoviesSortedByRate(page));
     }
 
-    @GetMapping("/movies/search/{fullOrPartialName}")
+    @GetMapping(Routes.MOVIES_SEARCH)
     public ResponseEntity<List<DetailedMovieInfo>> moviesSearchBy(
             @PathVariable String fullOrPartialName,
             @RequestParam(defaultValue = "1") int page) {
@@ -40,32 +40,32 @@ public class MoviesController {
                 .ok(moviesSubSystem.pagedSearchMovieByName(fullOrPartialName, page));
     }
 
-    @GetMapping("/movies/sorted/releasedate")
+    @GetMapping(Routes.MOVIES_SORTED_RELEASE_DATE)
     public ResponseEntity<List<DetailedMovieInfo>> moviesSortedByReleaseDate(
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedMoviesSortedByReleaseDate(page));
     }
 
-    @GetMapping("/movies")
+    @GetMapping(Routes.MOVIES_LIST)
     public ResponseEntity<List<DetailedMovieInfo>> allMovies(
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedMoviesSortedByName(page));
     }
 
-    @GetMapping("/movies/by/{ids}")
+    @GetMapping(Routes.MOVIES_BY_IDS)
     public ResponseEntity<List<MovieInfo>> allMoviesInfo(
             @PathVariable List<Long> ids) {
         return ResponseEntity.ok(moviesSubSystem.allMovieInfosBy(ids));
     }
 
-    @GetMapping("/movies/{id}/rate")
+    @GetMapping(Routes.MOVIES_RATES)
     public ResponseEntity<List<UserMovieRate>> pagedRatesOfOrderedDate(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") int page) {
         return ResponseEntity.ok(moviesSubSystem.pagedRatesOfOrderedDate(id, page));
     }
 
-    @PostMapping("/movies/private/{movieId}/rate")
+    @PostMapping(Routes.MOVIES_PRIVATE_RATE)
     public ResponseEntity<UserMovieRate> rateMovie(
             @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId,
             @PathVariable Long movieId, @RequestBody RateRequest rateRequest) {
@@ -78,7 +78,7 @@ public class MoviesController {
         return ResponseEntity.ok(userMovieRated);
     }
 
-    @PostMapping("/movies/private/new")
+    @PostMapping(Routes.MOVIES_PRIVATE_NEW)
     public ResponseEntity<DetailedMovieInfo> addNewMovie(
             @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId,
             @RequestBody NewMovieRequest movieRequest) {

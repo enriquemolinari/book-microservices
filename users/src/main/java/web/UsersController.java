@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 @RestController
 //Note: there is a convention with API Gateway team.
-// Those endpoints that must be secured must be prefixed with /users/private
+// Those endpoints that must be secured must be prefixed with Routes.USERS_PRIVATE
 public class UsersController {
 
     public static final String AUTHENTICATION_REQUIRED = "You must be logged in to perform this action...";
@@ -26,7 +26,7 @@ public class UsersController {
     }
 
 
-    @PostMapping("/users/register")
+    @PostMapping(Routes.USERS_REGISTER)
     public ResponseEntity<Long> userRegistration(
             @RequestBody UserRegistrationRequest request) {
         return ResponseEntity
@@ -36,7 +36,7 @@ public class UsersController {
                         request.repeatPassword()));
     }
 
-    @GetMapping("/users/private/profile")
+    @GetMapping(Routes.USERS_PRIVATE_PROFILE)
     public ResponseEntity<UserProfile> userProfile(
             // Although this request header is required, I don't want to define it that way
             // because Spring would respond with an error message, and I prefer not to expose
@@ -48,13 +48,13 @@ public class UsersController {
         });
     }
 
-    @GetMapping("/users/profile/by/{ids}")
+    @GetMapping(Routes.USERS_PROFILE_BY_IDS)
     public ResponseEntity<List<UserProfile>> usersProfileBy(
             @PathVariable List<Long> ids) {
         return ResponseEntity.ok(usersSubSystem.allUsersProfileBy(ids));
     }
 
-    @PostMapping("/users/private/changepassword")
+    @PostMapping(Routes.USERS_PRIVATE_CHANGEPASSWORD)
     public ResponseEntity<Void> changePassword(
             @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId,
             @RequestBody ChangePasswordRequest passBody) {
@@ -65,7 +65,7 @@ public class UsersController {
         });
     }
 
-    @PostMapping("/users/login")
+    @PostMapping(Routes.USERS_LOGIN)
     public ResponseEntity<UserProfile> login(@RequestBody LoginRequest form) {
         String token = usersSubSystem.login(form.username(), form.password());
         var profile = usersSubSystem.profileFrom(usersSubSystem.userIdFrom(token));
@@ -77,7 +77,7 @@ public class UsersController {
         return ResponseEntity.ok().headers(headers).body(profile);
     }
 
-    @PostMapping("/users/private/logout")
+    @PostMapping(Routes.USERS_PRIVATE_LOGOUT)
     public ResponseEntity<Void> logout(
             @RequestHeader(value = FW_GATEWAY_USER_ID, required = false) Long userId) {
         return ifUserIdInHeaderDo(userId, (uid) -> {
@@ -89,7 +89,7 @@ public class UsersController {
         });
     }
 
-    @PostMapping("/users/token")
+    @PostMapping(Routes.USERS_TOKEN)
     public ResponseEntity<Long> userIdIfTokenValid(@RequestBody String token) {
         Long userId = usersSubSystem.userIdFrom(token);
         return ResponseEntity.ok(userId);
@@ -102,3 +102,4 @@ public class UsersController {
         return method.apply(userId);
     }
 }
+

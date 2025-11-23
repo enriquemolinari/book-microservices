@@ -53,7 +53,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesOk() {
-        var response = get(urlForTests() + "/movies");
+        var response = get(moviesUrl(Routes.MOVIES_LIST));
 
         response.then().body(MOVIE_NAME_KEY,
                 hasItems(CRASH_TEA_MOVIE_NAME,
@@ -64,7 +64,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesInfoOk() {
-        var response = get(urlForTests() + "/movies/by/1,2,3,4");
+        var response = get(moviesByIdsUrl("1,2,3,4"));
 
         response.then().body(MOVIE_NAME_KEY,
                 hasItems(CRASH_TEA_MOVIE_NAME,
@@ -77,7 +77,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesSortedRateOk() {
-        var response = get(urlForTests() + "/movies/sorted/rate");
+        var response = get(moviesUrl(Routes.MOVIES_SORTED_RATE));
         response.then().body("[0].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         response.then().body("[1].name", is(SMALL_FISH_MOVIE_NAME));
         assertOnMovies(response);
@@ -85,7 +85,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesSortedReleaseDateOk() {
-        var response = get(urlForTests() + "/movies/sorted/releasedate");
+        var response = get(moviesUrl(Routes.MOVIES_SORTED_RELEASE_DATE));
         response.then().body("[0].name", is(RUNNING_FAR_AWAY_MOVIE_NAME));
         response.then().body("[1].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         assertOnMovies(response);
@@ -93,7 +93,7 @@ public class MoviesControllerTest {
 
     @Test
     public void moviesSearchOk() {
-        var response = get(urlForTests() + "/movies/search/rock");
+        var response = get(moviesSearchUrl("rock"));
         response.then().body("[0].name", is(ROCK_IN_THE_SCHOOL_MOVIE_NAME));
         assertOnMovies(response);
     }
@@ -115,7 +115,7 @@ public class MoviesControllerTest {
 
     @Test
     public void movieOneOk() {
-        var response = get(urlForTests() + "/movies/1");
+        var response = get(movieByIdUrl(1L));
 
         response.then().body(MOVIE_NAME_KEY,
                 is(oneOf(SMALL_FISH_MOVIE_NAME, ROCK_IN_THE_SCHOOL_MOVIE_NAME,
@@ -133,7 +133,7 @@ public class MoviesControllerTest {
 
     @Test
     public void ratesFromMovieOneOk() {
-        var response = get(urlForTests() + "/movies/1/rate");
+        var response = get(movieRateUrl(1L));
 
         response.then().body(JSON_ROOT,
                 hasItem(allOf(both(hasEntry(USER_ID_KEY, 3)).and(
@@ -157,7 +157,7 @@ public class MoviesControllerTest {
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .header(new Header(FW_GATEWAY_USER_ID, NICO_USER_ID))
                 .body(rateRequestBody.toString())
-                .post(urlForTests() + "/movies/private/" + NICO_USER_ID + "/rate");
+                .post(privateMovieRateUrl(NICO_USER_ID));
 
         response.then().body(USER_ID_KEY, is(Integer.valueOf(NICO_USER_ID)))
                 .body(RATE_VALUE_KEY, is(4))
@@ -172,9 +172,33 @@ public class MoviesControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(rateRequestBody.toString())
-                .post(urlForTests() + "/movies/private/1/rate");
+                .post(privateMovieRateUrl("1"));
 
         response.then().statusCode(401).body(ERROR_MESSAGE_KEY,
                 is(MoviesController.AUTHENTICATION_REQUIRED));
+    }
+
+    private String moviesUrl(String route) {
+        return urlForTests().concat(route);
+    }
+
+    private String moviesByIdsUrl(String ids) {
+        return moviesUrl(Routes.MOVIES_BY_IDS.replace("{ids}", ids));
+    }
+
+    private String moviesSearchUrl(String query) {
+        return moviesUrl(Routes.MOVIES_SEARCH.replace("{fullOrPartialName}", query));
+    }
+
+    private String movieByIdUrl(Long id) {
+        return moviesUrl(Routes.MOVIES_BY_ID.replace("{id}", id.toString()));
+    }
+
+    private String movieRateUrl(Long id) {
+        return moviesUrl(Routes.MOVIES_RATES.replace("{id}", id.toString()));
+    }
+
+    private String privateMovieRateUrl(String movieId) {
+        return moviesUrl(Routes.MOVIES_PRIVATE_RATE.replace("{movieId}", movieId));
     }
 }

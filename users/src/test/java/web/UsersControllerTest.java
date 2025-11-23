@@ -27,8 +27,6 @@ import static web.UsersController.FW_GATEWAY_USER_ID;
 @ActiveProfiles(value = "test")
 public class UsersControllerTest {
 
-    public static final String LOGIN_URI = "/users/login";
-    public static final String CHANGE_PASS_URI_PATH = "/users/private/changepassword";
     private static final String CHANGE_PASS_BODY_CURRENT_PASS = "currentPassword";
     private static final String CHANGE_PASS_BODY_PASSWORD1 = "newPassword1";
     private static final String CHANGE_PASS_BODY_PASSWORD2 = "newPassword2";
@@ -51,6 +49,14 @@ public class UsersControllerTest {
         return HOST.concat(":").concat(SERVER_PORT);
     }
 
+    private String userEndpoint(String route) {
+        return urlForTests().concat(route);
+    }
+
+    private String profileByIdsEndpoint(String ids) {
+        return userEndpoint(Routes.USERS_PROFILE_BY_IDS.replace("{ids}", ids));
+    }
+
     @Test
     public void loginOk() {
         var response = loginAsJosePost();
@@ -65,7 +71,7 @@ public class UsersControllerTest {
     public void logoutOk() {
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .header(new Header(FW_GATEWAY_USER_ID, "114"))
-                .post(urlForTests() + "/users/private/logout");
+                .post(urlForTests() + Routes.USERS_PRIVATE_LOGOUT);
 
         var cookie = response.getDetailedCookie(TOKEN_COOKIE_NAME);
         assertEquals(0, cookie.getMaxAge());
@@ -90,13 +96,13 @@ public class UsersControllerTest {
         }
         return given().contentType(JSON_CONTENT_TYPE)
                 .body(loginRequestBody.toString())
-                .post(urlForTests() + LOGIN_URI);
+                .post(userEndpoint(Routes.USERS_LOGIN));
     }
 
     private Long userIdFromValidToken(String token) {
         return given()
                 .body(token)
-                .post(urlForTests() + "/users/token")
+                .post(userEndpoint(Routes.USERS_TOKEN))
                 .getBody()
                 .as(Long.class);
     }
@@ -109,7 +115,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(loginRequestBody.toString())
-                .post(urlForTests() + LOGIN_URI);
+                .post(userEndpoint(Routes.USERS_LOGIN));
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is("Invalid username or password"));
@@ -128,7 +134,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(registerRequestBody.toString())
-                .post(urlForTests() + "/users/register");
+                .post(userEndpoint(Routes.USERS_REGISTER));
 
         response.then().statusCode(200);
 
@@ -137,22 +143,22 @@ public class UsersControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/users/private/profile"})
+    @ValueSource(strings = {Routes.USERS_PRIVATE_PROFILE})
     public void privateGetEndpointsFailIfNotAuthenticated(String uriPath) {
-        var response = get(urlForTests() + uriPath);
+        var response = get(userEndpoint(uriPath));
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/users/private/logout"
-            , "/users/private/changepassword"})
+    @ValueSource(strings = {Routes.USERS_PRIVATE_LOGOUT
+            , Routes.USERS_PRIVATE_CHANGEPASSWORD})
     public void privatePostEndpointsFailIfNotAuthenticated(String uriPath) throws JSONException {
         JSONObject changePassRequestBody = changePasswordBody();
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + uriPath);
+                .post(userEndpoint(uriPath));
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
@@ -168,7 +174,7 @@ public class UsersControllerTest {
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .header(new Header(FW_GATEWAY_USER_ID, userId.toString()))
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + CHANGE_PASS_URI_PATH);
+                .post(userEndpoint(Routes.USERS_PRIVATE_CHANGEPASSWORD));
         assertEquals(500, response.statusCode());
         response.then().body(ERROR_MESSAGE_KEY,
                 is("Passwords must be equals"));
@@ -180,7 +186,7 @@ public class UsersControllerTest {
 
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + CHANGE_PASS_URI_PATH);
+                .post(userEndpoint(Routes.USERS_PRIVATE_CHANGEPASSWORD));
 
         response.then().body(ERROR_MESSAGE_KEY,
                 is(UsersController.AUTHENTICATION_REQUIRED));
@@ -195,7 +201,7 @@ public class UsersControllerTest {
         var response = given().contentType(JSON_CONTENT_TYPE)
                 .header(new Header(FW_GATEWAY_USER_ID, userId.toString()))
                 .body(changePassRequestBody.toString())
-                .post(urlForTests() + CHANGE_PASS_URI_PATH);
+                .post(userEndpoint(Routes.USERS_PRIVATE_CHANGEPASSWORD));
 
         assertEquals(200, response.statusCode());
     }
@@ -218,7 +224,7 @@ public class UsersControllerTest {
         Long userId = userIdFromValidToken(token);
         var response = given()
                 .header(new Header(FW_GATEWAY_USER_ID, userId.toString()))
-                .get(urlForTests() + "/users/private/profile");
+                .get(userEndpoint(Routes.USERS_PRIVATE_PROFILE));
 
         response.then().body(USERNAME_KEY, is(USERNAME_JOSE))
                 .body(FULLNAME_KEY, is(JOSE_FULLNAME))
@@ -228,7 +234,7 @@ public class UsersControllerTest {
     @Test
     public void retrieveUsersByIds() {
         var response = given()
-                .get(urlForTests() + "/users/profile/by/1,2");
+                .get(profileByIdsEndpoint("1,2"));
 
         response.then().body("$",
                 hasItem(allOf(both(hasEntry("userId", 1)).and(

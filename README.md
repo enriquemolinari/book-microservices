@@ -107,8 +107,6 @@ is required, and any relevant notes. All endpoints will be exposed through the A
 | 9  | `POST /movies/private/{movieId}/rate`    | Create a new rate for a movie.             |
 | 10 | `POST /movies/private/new`               | Create a new movie.                        |
 
-Examples for Movies APIs
-
 Example for API #1:
 
 ```bash
@@ -165,7 +163,7 @@ curl -X GET "http://localhost:8080/composed/movies/1/rate" \
      -H "Accept: application/json"
 ```
 
-Example for API #9 (require authentication):
+Example for API #9:
 
 ```bash
 curl -X POST "http://localhost:8080/movies/private/2/rate" \
@@ -196,8 +194,6 @@ curl -X POST "http://localhost:8080/movies/private/new" \
 | 7 | `POST /shows/private/{showId}/reserve` | Reserve seats for a show.                                      |
 | 8 | `POST /shows/private/{showId}/pay`     | Pay seats for a show.                                          |
 | 9 | `GET /composed/shows/sales/{salesId}`  | Sale details composed with user and movie data.                |
-
-Examples for Shows APIs
 
 Example for API #1:
 
@@ -279,8 +275,6 @@ curl -X GET "http://localhost:8080/composed/shows/sales/{AN_UUID}" \
 | 6 | `GET /composed/users/private/profile` | Retrieves user profile composed with points earned. |
 | 7 | `POST /users/private/changepassword`  | Changes password for an authenticated user.         |
 | 8 | `POST /users/private/logout`          | Clears the `token` cookie and signs out.            |
-
-Examples for Users APIs
 
 Example for API #1:
 

@@ -57,4 +57,4 @@ spring:
           uri: ${server.ms.host}:${port.users}
           predicates:
             - Path=/users/**
-            - Method=POST
+            - Method=POST,GET

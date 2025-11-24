@@ -94,232 +94,254 @@ is required, and any relevant notes. All endpoints will be exposed through the A
 
 ### Movies Endpoints
 
-| URI                                      | Notes                                      |
-|------------------------------------------|--------------------------------------------|
-| `GET /movies/{id}`                       |                                            |
-| `GET /movies/sorted/rate`                | Paginated.                                 |
-| `GET /movies/sorted/releasedate`         | Paginated.                                 |
-| `GET /movies`                            | Paginated. Sorted list by name.            |
-| `GET /movies/search/{fullOrPartialName}` | Name search with pagination.               |
-| `GET /movies/by/{ids}`                   | Accepts a list of IDs.                     |
-| `GET /movies/{id}/rate`                  | Ratings ordered by date.                   |
-| `GET /composed/movies/{id}/rate`         | Same as before but composed with userName. |
-| `POST /movies/private/{movieId}/rate`    | Auth Required.                             |
-| `POST /movies/private/new`               | Auth Required.                             |
+| #  | URI                                      | Notes                                      |
+|----|------------------------------------------|--------------------------------------------|
+| 1  | `GET /movies/{id}`                       | Movie detail by ID.                        |
+| 2  | `GET /movies/sorted/rate`                | Sorted by rate, paginated.                 |
+| 3  | `GET /movies/sorted/releasedate`         | Sorted by release date, paginated.         |
+| 4  | `GET /movies`                            | Sorted list by name, paginated.            |
+| 5  | `GET /movies/search/{fullOrPartialName}` | Name search with pagination.               |
+| 6  | `GET /movies/by/{ids}`                   | Movie details by comma-separated IDs       |
+| 7  | `GET /movies/{id}/rate`                  | Ratings ordered by date.                   |
+| 8  | `GET /composed/movies/{id}/rate`         | Same as before but composed with userName. |
+| 9  | `POST /movies/private/{movieId}/rate`    | Create a new rate for a movie.             |
+| 10 | `POST /movies/private/new`               | Create a new movie.                        |
+
+Examples for Movies APIs
+
+Example for API #1:
+
+```bash
+curl -X GET "http://localhost:8080/movies/1" \
+     -H "Accept: application/json"
+```
+
+Example for API #2:
+
+```bash
+curl -X GET "http://localhost:8080/movies/sorted/rate?page=1" \
+     -H "Accept: application/json"
+```
+
+Example for API #3:
+
+```bash
+curl -X GET "http://localhost:8080/movies/sorted/releasedate?page=1" \
+     -H "Accept: application/json"
+```
+
+Example for API #4:
+
+```bash
+curl -X GET "http://localhost:8080/movies?page=1" \
+     -H "Accept: application/json"
+```
+
+Example for API #5:
+
+```bash
+curl -X GET "http://localhost:8080/movies/search/fish?page=1" \
+     -H "Accept: application/json"
+```
+
+Example for API #6:
+
+```bash
+curl -X GET "http://localhost:8080/movies/by/1,2" \
+     -H "Accept: application/json"
+```
+
+Example for API #7:
+
+```bash
+curl -X GET "http://localhost:8080/movies/1/rate" \
+     -H "Accept: application/json"
+```
+
+Example for API #8:
+
+```bash
+curl -X GET "http://localhost:8080/composed/movies/1/rate" \
+     -H "Accept: application/json"
+```
+
+Example for API #9 (require authentication):
+
+```bash
+curl -X POST "http://localhost:8080/movies/private/2/rate" \
+     -H "Content-Type: application/json" \
+     -H "Cookie: token={A_TOKEN}" \
+     -d '{"rateValue": 5, "comment": "Loved it"}'
+```
+
+Example for API #10:
+
+```bash
+curl -X POST "http://localhost:8080/movies/private/new" \
+     -H "Content-Type: application/json" \
+     -H "Cookie: token={A_TOKEN}" \
+     -d '{"name": "Movie name", "duration": 148, "releaseDate": "2010-07-16", "plot": "A mind-bending thriller.", "genres": ["ACTION", "THRILLER"]}'
+```
 
 ### Shows Endpoints
 
-| URI                                    | Notes                                                           |
-|----------------------------------------|-----------------------------------------------------------------|
-| `GET /shows`                           | Shows available in the next 10 days.                            |
-| `GET /composed/shows`                  | Shows available in the next 10 days, composed with movie data.  |
-| `GET /shows/{id}`                      | Show detail.                                                    |
-| `GET /shows/movie/{id}`                | Shows grouped by movie.                                         |
-| `GET /shows/buyer`                     | Used by the API Composer to build user profile.                 |
-| `GET /shows/sale/{salesIdentifier}`    | Used by API Composer to create the notification after purchase. |
-| `POST /shows/private/{showId}/reserve` | Reserve seats for a show.                                       |
-| `POST /shows/private/{showId}/pay`     | Pay seats for a show.                                           |
-| `GET /composed/shows/sales/{salesId}`  | Sale data composed with user and movie data.                    |
+| # | URI                                    | Notes                                                          |
+|---|----------------------------------------|----------------------------------------------------------------|
+| 1 | `GET /shows`                           | Shows available in the next 10 days.                           |
+| 2 | `GET /composed/shows`                  | Shows available in the next 10 days, composed with movie data. |
+| 3 | `GET /shows/{id}`                      | Show detail.                                                   |
+| 4 | `GET /shows/movie/{id}`                | Shows grouped by movie.                                        |
+| 5 | `GET /shows/buyer`                     | Obtain buyer's points earned.                                  |
+| 6 | `GET /shows/sale/{salesIdentifier}`    | Sale details.                                                  |
+| 7 | `POST /shows/private/{showId}/reserve` | Reserve seats for a show.                                      |
+| 8 | `POST /shows/private/{showId}/pay`     | Pay seats for a show.                                          |
+| 9 | `GET /composed/shows/sales/{salesId}`  | Sale details composed with user and movie data.                |
+
+Examples for Shows APIs
+
+Example for API #1:
+
+```bash
+curl -X GET "http://localhost:8080/shows" \
+     -H "Accept: application/json"
+```
+
+Example for API #2:
+
+```bash
+curl -X GET "http://localhost:8080/composed/shows" \
+     -H "Accept: application/json"
+```
+
+Example for API #3:
+
+```bash
+curl -X GET "http://localhost:8080/shows/1" \
+     -H "Accept: application/json"
+```
+
+Example for API #4:
+
+```bash
+curl -X GET "http://localhost:8080/shows/movie/1" \
+     -H "Accept: application/json"
+```
+
+Example for API #5:
+
+```bash
+curl -X GET "http://localhost:8080/shows/buyer" \
+     -H "Accept: application/json" \
+     -H "fw-gateway-user-id: 1"
+```
+
+Example for API #6:
+
+```bash
+curl -X GET "http://localhost:8080/shows/sale/sale-123" \
+     -H "Accept: application/json"
+```
+
+Example for API #7:
+
+```bash
+curl -X POST "http://localhost:8080/shows/private/1/reserve" \
+     -H "Content-Type: application/json" \
+     -H "Cookie: token={A_TOKEN}" \
+     -d '[1, 2, 3]'
+```
+
+Example for API #8:
+
+```bash
+curl -X POST "http://localhost:8080/shows/private/1/pay" \
+     -H "Content-Type: application/json" \
+     -H "Cookie: token={A_TOKEN}" \
+     -d '{"selectedSeats": [1, 2, 3], "creditCardNumber": "4111111111111111", "secturityCode": "123", "expirationYear": 2026, "expirationMonth": 12}'
+```
+
+Example for API #9:
+
+```bash
+curl -X GET "http://localhost:8080/composed/shows/sales/{AN_UUID}" \
+     -H "Accept: application/json"
+```
 
 ### Users Endpoints
 
-| URI                                   | Notes                                               |
-|---------------------------------------|-----------------------------------------------------|
-| `POST /users/register`                | Public registration.                                |
-| `POST /users/login`                   | Returns HTTP-only `token` cookie and user profile.  |
-| `POST /users/token`                   | Validates token and returns the associated userId.  |
-| `GET /users/profile/by/{ids}`         | Retrieves multiple profiles by IDs.                 |
-| `GET /users/private/profile`          | Retrieves user profile.                             |
-| `GET /composed/users/private/profile` | Retrieves user profile composed with points earned. |
-| `POST /users/private/changepassword`  | Changes password for the authenticated user.        |
-| `POST /users/private/logout`          | Clears the `token` cookie and signs out.            |
+| # | URI                                   | Notes                                               |
+|---|---------------------------------------|-----------------------------------------------------|
+| 1 | `POST /users/register`                | User registration.                                  |
+| 2 | `POST /users/login`                   | Returns HTTP-only `token` cookie and user profile.  |
+| 3 | `POST /users/token`                   | Validates token and returns the associated userId.  |
+| 4 | `GET /users/profile/by/{ids}`         | Retrieves multiple profiles by comma-separated IDs. |
+| 5 | `GET /users/private/profile`          | Retrieves user profile.                             |
+| 6 | `GET /composed/users/private/profile` | Retrieves user profile composed with points earned. |
+| 7 | `POST /users/private/changepassword`  | Changes password for an authenticated user.         |
+| 8 | `POST /users/private/logout`          | Clears the `token` cookie and signs out.            |
 
-#### Examples
+Examples for Users APIs
 
-##### Movies
+Example for API #1:
 
-###### GET /movies/{id}
-
-Request:
-`GET /movies/1`
-
-###### GET /movies/sorted/rate, `/movies/sorted/releasedate`, `/movies`, `/movies/search/{fullOrPartialName}`
-
-Request (paginated):
-`GET /movies/search/moviename?page=1`
-
-###### GET /movies/by/{ids}
-
-Request:
-`GET /movies/by/1,3`
-
-###### GET /movies/{id}/rate
-
-Request:
-`GET /movies/1/rate?page=1`
-
-###### GET /composed/movies/{id}/rate
-
-Request:
-`GET /composed/movies/1/rate`
-
-###### POST /movies/private/{movieId}/rate
-
-```json
-{
-  "rateValue": 5,
-  "comment": "Loved it"
-}
+```bash
+curl -X POST "http://localhost:8080/users/register" \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Malcom", "surname": "Joven", "email": "my@codingarchstyle.com", "username": "malcom", "password": "abcdi1234567", "repeatPassword": "abcdi1234567"}'
 ```
 
-###### POST /movies/private/new
+Example for API #2:
 
-```json
-{
-  "name": "Movie name",
-  "duration": 148,
-  "releaseDate": "2010-07-16",
-  "plot": "A mind-bending thriller.",
-  "genres": [
-    "ACTION",
-    "THRILLER"
-  ]
-}
+```bash
+curl -X POST "http://localhost:8080/users/login" \
+     -H "Content-Type: application/json" \
+     -d '{"username": "nico", "password": "123456789012"}'
 ```
 
-##### Shows
+Example for API #3:
 
-###### GET /shows
-
-Request:
-`GET /shows`
-
-###### GET /composed/shows
-
-Request:
-`GET /composed/shows`
-
-###### GET /shows/{id}
-
-Request:
-`GET /shows/11`
-
-###### GET /shows/movie/{id}
-
-Request:
-`GET /shows/movie/2`
-
-###### GET /shows/buyer
-
-Request (auth header required):
-
-```
-GET /shows/buyer
-fw-gateway-user-id: 4
+```bash
+curl -X POST "http://localhost:8080/users/token" \
+     -H "Content-Type: application/json" \
+     -d '"eyJhbGciOi..."'
 ```
 
-###### GET /shows/sale/{salesIdentifier}
+Example for API #4:
 
-Request:
-`GET /shows/sale/SALE-123`
-
-###### GET /composed/shows/sales/{salesId}
-
-Request:
-`GET /composed/shows/sales/SALE-123`
-
-###### POST /shows/private/{showId}/reserve
-
-```json
-[
-  1,
-  2,
-  3
-]
+```bash
+curl -X GET "http://localhost:8080/users/profile/by/1,2" \
+     -H "Accept: application/json"
 ```
 
-###### POST /shows/private/{showId}/pay
+Example for API #5:
 
-```json
-{
-  "selectedSeats": [
-    4,
-    5
-  ],
-  "creditCardNumber": "4111111111111111",
-  "secturityCode": "123",
-  "expirationYear": 2026,
-  "expirationMonth": 12
-}
+```bash
+curl -X GET "http://localhost:8080/users/private/profile" \
+     -H "Accept: application/json" \
+     -H "Cookie: token={A_TOKEN}"
 ```
 
-##### Users
+Example for API #6:
 
-###### GET /users/profile/by/{ids}
-
-Request:
-`GET /users/profile/by/4,5`
-
-###### GET /users/private/profile
-
-Request (auth header required):
-
-```
-GET /users/private/profile
-fw-gateway-user-id: 4
+```bash
+curl -X GET "http://localhost:8080/composed/users/private/profile" \
+     -H "Accept: application/json" \
+     -H "Cookie: token={A_TOKEN}"
 ```
 
-###### GET /composed/users/private/profile
+Example for API #7:
 
-Request (auth header required):
-
-```
-GET /composed/users/private/profile
-fw-gateway-user-id: 4
-```
-
-###### POST /users/register
-
-```json
-{
-  "name": "Malcom",
-  "surname": "Joven",
-  "email": "my@codingarchstyle.com",
-  "username": "malcom",
-  "password": "abcdi1234567",
-  "repeatPassword": "abcdi1234567"
-}
+```bash
+curl -X POST "http://localhost:8080/users/private/changepassword" \
+     -H "Content-Type: application/json" \
+     -H "Cookie: token={A_TOKEN}" \
+     -d '{"currentPassword": "old", "newPassword1": "new", "newPassword2": "new"}'
 ```
 
-###### POST /users/login
+Example for API #8:
 
-```json
-{
-  "username": "nico",
-  "password": "123456789012"
-}
+```bash
+curl -X POST "http://localhost:8080/users/private/logout" \
+     -H "Accept: application/json" \
+     -H "Cookie: token={A_TOKEN}"
 ```
-
-###### POST /users/token
-
-```json
-"eyJhbGciOi..."
-```
-
-###### POST /users/private/changepassword
-
-```json
-{
-  "currentPassword": "old",
-  "newPassword1": "new",
-  "newPassword2": "new"
-}
-```
-
-###### POST /users/private/logout
-
-_No request body; the endpoint clears the `token` cookie and returns `204 No Content`._
-
-Routes prefixed with `/private` pass through the `TokenVerificationFilter`, which enforces the `token` cookie and
-forwards `userId` via the `fw-gateway-user-id` header. The composed endpoints (`/composed/*`) route to the API
-Composition service.

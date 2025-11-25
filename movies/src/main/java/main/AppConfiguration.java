@@ -2,9 +2,7 @@ package main;
 
 import api.MoviesSubSystem;
 import jakarta.annotation.PreDestroy;
-import jakarta.persistence.Persistence;
 import model.Movies;
-import model.PersistenceUnit;
 import model.UserCreator;
 import model.queue.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,9 +33,10 @@ public class AppConfiguration {
 
     @Bean
     public MoviesSubSystem createMovies() {
-        var emf = Persistence
-                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_MOVIES_MS,
-                        PersistenceUnit.connStrProperties(dbUrl, dbUser, dbPassword));
+        var emf = new EmfBuilder(dbUser, dbPassword)
+                .memory(dbUrl)
+                .withDropAndCreateDDL()
+                .build();
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),

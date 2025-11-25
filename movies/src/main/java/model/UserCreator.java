@@ -1,6 +1,5 @@
 package model;
 
-import common.Tx;
 import jakarta.persistence.EntityManagerFactory;
 
 public class UserCreator {
@@ -11,7 +10,7 @@ public class UserCreator {
     }
 
     public void newUser(long userId) {
-        new Tx(this.emf).inTx(em -> {
+        emf.runInTransaction(em -> {
             em.persist(new User(userId));
         });
     }

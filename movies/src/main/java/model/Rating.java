@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Setter(value = AccessLevel.PRIVATE)
 @Getter(value = AccessLevel.PRIVATE)
-class Rating {
+public class Rating {
 
     private int totalUserVotes = 0;
     private float rateValue = 0;

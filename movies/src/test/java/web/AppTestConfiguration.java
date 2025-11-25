@@ -1,10 +1,9 @@
 package web;
 
 import api.MoviesSubSystem;
-import jakarta.persistence.Persistence;
+import main.EmfBuilder;
 import main.SetUpSampleDb;
 import model.Movies;
-import model.PersistenceUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,9 +21,10 @@ public class AppTestConfiguration {
 
     @Bean
     public MoviesSubSystem createMovies() {
-        var emf = Persistence
-                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_MOVIES_MS,
-                        PersistenceUnit.connStrProperties(dbUrl, dbUser, dbPassword));
+        var emf = new EmfBuilder(dbUser, dbPassword)
+                .memory(dbUrl)
+                .withDropAndCreateDDL()
+                .build();
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         return new Movies(emf);
     }

@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.RollbackException;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Tx {
@@ -21,7 +20,7 @@ public class Tx {
 
         while (retries < numberOfRetries) {
             try {
-                return inTx(toExecute);
+                return emf.callInTransaction(toExecute);
                 // There is no a great way in JPA to detect a constraint
                 // violation. I use RollbackException and retries one more
                 // time for specific use cases
@@ -32,36 +31,5 @@ public class Tx {
         }
         throw new RuntimeException(
                 "Trasaction could not be completed due to concurrency conflic");
-    }
-
-    public <T> T inTx(Function<EntityManager, T> toExecute) {
-        return executeInTransaction(em -> toExecute.apply(em));
-    }
-
-    public void inTx(Consumer<EntityManager> toExecute) {
-        executeInTransaction(em -> {
-            toExecute.accept(em);
-            // just to conform the compiler
-            return null;
-        });
-    }
-
-    private <T> T executeInTransaction(Function<EntityManager, T> toExecute) {
-        var em = emf.createEntityManager();
-        var tx = em.getTransaction();
-
-        try {
-            tx.begin();
-
-            T t = toExecute.apply(em);
-            tx.commit();
-
-            return t;
-        } catch (Exception e) {
-            tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
     }
 }

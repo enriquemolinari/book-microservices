@@ -5,11 +5,11 @@ import api.Genre;
 import api.MovieInfo;
 import api.MoviesException;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import main.EmfBuilder;
 import model.events.publish.NewMovieEvent;
 import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -17,15 +17,29 @@ import java.util.List;
 import java.util.Set;
 
 import static model.ForTests.*;
-import static model.PersistenceUnit.DERBY_EMBEDDED_MOVIES_MS;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MoviesTest {
 
     private static final Long NON_EXISTENT_ID = -2L;
-
+    private static EntityManagerFactory emf;
     private final ForTests tests = new ForTests();
-    private EntityManagerFactory emf;
+
+    @BeforeAll
+    public static void setUp() {
+//        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_MOVIES_MS,
+//                PersistenceUnit.connStrProperties("jdbc:derby:memory:movies;create=true", "app", "app"));
+        emf = new EmfBuilder("app", "app")
+                .memory("jdbc:derby:memory:movies;create=true")
+                .withDropAndCreateDDL()
+                .build();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        emf.getSchemaManager().truncate();
+    }
+
 
     private List<String> genresEnumSetToUpperCaseStrings(Set<Genre> comedyFantasyGenres) {
         return comedyFantasyGenres.stream().map(s -> s.toString().toUpperCase())
@@ -38,12 +52,6 @@ public class MoviesTest {
 
     private Movies createMoviesSubsystem() {
         return new Movies(emf);
-    }
-
-    @BeforeEach
-    public void setUp() {
-        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_MOVIES_MS,
-                PersistenceUnit.connStrProperties("jdbc:derby:memory:movies;create=true", "app", "app"));
     }
 
     @Test
@@ -245,10 +253,5 @@ public class MoviesTest {
 
     private Long registerAUser(Movies movies) {
         return movies.addNewUser(3L);
-    }
-
-    @AfterEach
-    public void tearDown() {
-        emf.close();
     }
 }

@@ -35,7 +35,7 @@ public class Movies implements MoviesSubSystem {
 
     @Override
     public DetailedMovieInfo movie(Long id) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             try {
                 return movieWithActorsById(id, em);
             } catch (NonUniqueResultException | NoResultException e) {
@@ -45,7 +45,7 @@ public class Movies implements MoviesSubSystem {
     }
 
     void modifyMovieName(Long id, String newName) {
-        new Tx(this.emf).inTx(em -> {
+        emf.callInTransaction(em -> {
             var movien = movieBy(id, em);
             movien.name(newName);
             return null;
@@ -55,7 +55,7 @@ public class Movies implements MoviesSubSystem {
 
     @Override
     public List<MovieInfo> allMovieInfosBy(List<Long> ids) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return em.createQuery("from Movie m "
                             + "join fetch m.genres g "
                             + "where m.id IN ?1 "
@@ -79,7 +79,7 @@ public class Movies implements MoviesSubSystem {
     @Override
     public DetailedMovieInfo addNewMovie(String name, int duration,
                                          LocalDate releaseDate, String plot, Set<Genre> genres) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var movie = new Movie(name, plot, duration, releaseDate, genres);
             em.persist(movie);
             new JQueueInTxtQueue(em).push(new NewMovieEvent(movie.id()).toJson());
@@ -90,7 +90,7 @@ public class Movies implements MoviesSubSystem {
     @Override
     public DetailedMovieInfo addActorTo(Long movieId, String name, String surname,
                                         String email, String characterName) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var movie = em.getReference(Movie.class, movieId);
             movie.addAnActor(name, surname, email, characterName);
             return movie.toDetailedInfo();
@@ -100,7 +100,7 @@ public class Movies implements MoviesSubSystem {
     @Override
     public DetailedMovieInfo addDirectorToMovie(Long movieId, String name,
                                                 String surname, String email) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var movie = em.getReference(Movie.class, movieId);
             movie.addADirector(name, surname, email);
             return movie.toDetailedInfo();
@@ -152,7 +152,7 @@ public class Movies implements MoviesSubSystem {
     public List<UserMovieRate> pagedRatesOfOrderedDate(Long movieId,
                                                        int pageNumber) {
         checkPageNumberIsGreaterThanZero(pageNumber);
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var q = em.createQuery(
                     "select ur from UserRate ur "
                             + "where ur.movie.id = ?1 "
@@ -170,7 +170,7 @@ public class Movies implements MoviesSubSystem {
     public List<DetailedMovieInfo> pagedSearchMovieByName(String fullOrPartmovieName,
                                                           int pageNumber) {
         checkPageNumberIsGreaterThanZero(pageNumber);
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var q = em.createQuery(
                     "select m from Movie m "
                             // a trigram index is required
@@ -205,7 +205,7 @@ public class Movies implements MoviesSubSystem {
     private List<DetailedMovieInfo> pagedMoviesSortedBy(int pageNumber,
                                                         String orderByClause) {
         checkPageNumberIsGreaterThanZero(pageNumber);
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var q = em.createQuery(
                     "select m from Movie m "
                             + orderByClause,
@@ -217,14 +217,14 @@ public class Movies implements MoviesSubSystem {
     }
 
     Long addNewUser(Long id) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             em.persist(new User(id));
             return id;
         });
     }
 
     List<JQueueTable> allQueued() {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return em.createQuery("from JQueueTable", JQueueTable.class).getResultList();
         });
     }

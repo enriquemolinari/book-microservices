@@ -20,7 +20,7 @@ import static model.Schema.DATABASE_SCHEMA_NAME;
 @Table(schema = DATABASE_SCHEMA_NAME, uniqueConstraints = {
         @UniqueConstraint(name = "USER_CANT_RATE_A_MOVIE_MORE_THAN_ONCE", columnNames = {
                 "movie_id", "user_id"})})
-class UserRate {
+public class UserRate {
 
     static final String INVALID_RATING = "Rate value must be an integer value between 0 and 5";
     @Id

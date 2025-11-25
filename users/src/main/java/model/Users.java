@@ -37,7 +37,7 @@ public class Users implements UsersSubSystem {
 
     @Override
     public String login(String username, String password) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var q = em.createQuery(
                     "select u from User u where u.userName = ?1 and u.password.password = ?2",
                     User.class);
@@ -85,14 +85,14 @@ public class Users implements UsersSubSystem {
 
     @Override
     public UserProfile profileFrom(Long userId) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return userBy(userId, em).toProfile();
         });
     }
 
     @Override
     public List<UserProfile> allUsersProfileBy(List<Long> ids) {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return em.createQuery("from User u "
                             + "where u.id IN ?1 ", User.class)
                     .setHint("org.hibernate.cacheable", "true")
@@ -105,7 +105,7 @@ public class Users implements UsersSubSystem {
     @Override
     public void changePassword(Long userId, String currentPassword,
                                String newPassword1, String newPassword2) {
-        new Tx(emf).inTx(em -> {
+        emf.runInTransaction(em -> {
             userBy(userId, em).changePassword(currentPassword, newPassword1,
                     newPassword2);
         });
@@ -122,9 +122,9 @@ public class Users implements UsersSubSystem {
         }
         return e;
     }
-    
+
     List<JQueueTable> allQueued() {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return em.createQuery("from JQueueTable", JQueueTable.class).getResultList();
         });
     }

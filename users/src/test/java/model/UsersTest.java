@@ -3,39 +3,47 @@ package model;
 import api.AuthException;
 import api.UsersException;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import main.EmfBuilder;
 import model.events.NewUserEvent;
 import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static model.PersistenceUnit.DERBY_EMBEDDED_USERS_MS;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UsersTest {
-
     public static final String ENRIUSER_USERNAME = "emolinari";
     public static final String ENRIUSER_PWD = "1234567895555";
     public static final String ENRIUSER_EMAIL = "enrique.molinari@gmail.com";
     public static final String ENRIUSER_NAME = "Enrique";
     public static final String ENRIUSER_SURNAME = "Molinari";
+    static final String CONN_STR = "jdbc:derby:memory:users;create=true";
+    static final String DB_USER = "app";
+    static final String DB_PWD = "app";
     private static final String JOSEUSER_SURNAME = "aSurname";
     private static final String JOSEUSER_NAME = "Jose";
     private static final String JOSEUSER_PASS = "password12345679";
     private static final String JOSEUSER_EMAIL = "jose@bla.com";
     private static final String JOSEUSER_USERNAME = "joseuser";
     private static final Long NON_EXISTENT_ID = -2L;
+    private static EntityManagerFactory emf;
     private final ForTests tests = new ForTests();
-    private EntityManagerFactory emf;
 
-    @BeforeEach
-    public void setUp() {
-        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_USERS_MS);
+    @BeforeAll
+    public static void setUp() {
+        emf = new EmfBuilder(DB_USER, DB_PWD)
+                .memory(CONN_STR)
+                .withDropAndCreateDDL()
+                .build();
     }
 
+    @AfterEach
+    public void tearDown() {
+        emf.getSchemaManager().truncate();
+    }
 
     @Test
     public void loginOk() {
@@ -157,9 +165,5 @@ public class UsersTest {
                 ENRIUSER_PWD, ENRIUSER_PWD);
     }
 
-    @AfterEach
-    public void tearDown() {
-        emf.close();
-    }
 
 }

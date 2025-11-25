@@ -10,7 +10,7 @@ import lombok.*;
 @Setter(value = AccessLevel.PRIVATE)
 @Getter(value = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = {"password"})
-class Password {
+public class Password {
     static final String NOT_VALID_PASSWORD = "Password is not valid";
     static final String CAN_NOT_CHANGE_PASSWORD = "Some of the provided information is not valid to change the password";
     static final String PASSWORDS_MUST_BE_EQUALS = "Passwords must be equals";

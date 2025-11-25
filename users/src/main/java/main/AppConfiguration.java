@@ -1,9 +1,7 @@
 package main;
 
 import api.UsersSubSystem;
-import jakarta.persistence.Persistence;
 import model.PasetoToken;
-import model.PersistenceUnit;
 import model.Users;
 import model.queue.DbConnStr;
 import model.queue.PushToBrokerFromJQueueWorker;
@@ -37,8 +35,10 @@ public class AppConfiguration {
 
     @Bean
     public UsersSubSystem createUsers() {
-        var emf = Persistence
-                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_USERS_MS);
+        var emf = new EmfBuilder(dbUser, dbPassword)
+                .memory(dbUrl)
+                .withDropAndCreateDDL()
+                .build();
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),

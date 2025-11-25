@@ -15,7 +15,7 @@ import static model.Schema.DATABASE_SCHEMA_NAME;
 @Getter(value = AccessLevel.PRIVATE)
 @Setter(value = AccessLevel.PRIVATE)
 @NoArgsConstructor
-class LoginAudit {
+public class LoginAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

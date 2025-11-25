@@ -1,10 +1,9 @@
 package web;
 
 import api.ShowsSubSystem;
-import jakarta.persistence.Persistence;
+import main.EmfBuilder;
 import main.SetUpSampleDb;
 import model.CreditCardPaymentProvider;
-import model.PersistenceUnit;
 import model.Shows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +22,10 @@ public class AppTestConfiguration {
 
     @Bean
     public ShowsSubSystem createShows() {
-        var emf = Persistence
-                .createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS,
-                        PersistenceUnit.connStrProperties(dbUrl, dbUser, dbPassword));
+        var emf = new EmfBuilder(dbUser, dbPassword)
+                .memory(dbUrl)
+                .withDropAndCreateDDL()
+                .build();
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         return new Shows(emf, doNothingPaymentProvider());
     }

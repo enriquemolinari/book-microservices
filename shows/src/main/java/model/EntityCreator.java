@@ -1,6 +1,5 @@
 package model;
 
-import common.Tx;
 import jakarta.persistence.EntityManagerFactory;
 
 public class EntityCreator {
@@ -11,7 +10,7 @@ public class EntityCreator {
     }
 
     public void persist(Object entity) {
-        new Tx(this.emf).inTx(em -> {
+        emf.runInTransaction(em -> {
             em.persist(entity);
         });
     }

@@ -14,20 +14,17 @@ public class EmfBuilder {
     private PersistenceConfiguration config;
 
     public EmfBuilder(String dbUser, String dbPwd) {
-        config = new PersistenceConfiguration("moviesMsConfig")
-                .managedClass(Actor.class)
-                .managedClass(Person.class)
+        config = new PersistenceConfiguration("showsMsConfig")
+                .managedClass(Buyer.class)
+                .managedClass(CreditCard.class)
                 .managedClass(Movie.class)
-                .managedClass(User.class)
-                .managedClass(Rating.class)
-                .managedClass(UserRate.class)
+                .managedClass(ShowSeat.class)
+                .managedClass(ShowTime.class)
+                .managedClass(Theater.class)
+                .managedClass(Sale.class)
                 .managedClass(JQueueTable.class)
                 .property(PersistenceConfiguration.JDBC_USER, dbUser)
                 .property(PersistenceConfiguration.JDBC_PASSWORD, dbPwd)
-                .property("hibernate.cache.region.factory_class", "jcache")
-                .property("hibernate.cache.use_second_level_cache", "true")
-                .property("hibernate.cache.use_query_cache", "true")
-                .property("hibernate.javax.cache.missing_cache_strategy", "create")
                 .property(PersistenceConfiguration.SCHEMAGEN_DATABASE_ACTION,
                         DO_NOTHING_WITH_SCHEMA);
     }

@@ -18,7 +18,7 @@ import static model.Schema.DATABASE_SCHEMA_NAME;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Setter(value = AccessLevel.PRIVATE)
 @Getter(value = AccessLevel.PRIVATE)
-class ShowSeat {
+public class ShowSeat {
 
     static final String SEAT_BUSY = "Seat is currently busy";
     static final String SEAT_NOT_RESERVED_OR_ALREADY_CONFIRMED = "The seat cannot be confirmed";

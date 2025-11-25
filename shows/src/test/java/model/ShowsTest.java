@@ -6,11 +6,11 @@ import api.ShowsException;
 import api.ShowsSubSystem;
 import common.DateTimeProvider;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import main.EmfBuilder;
 import model.events.publish.NewTicketsSoldEvent;
 import model.queue.JQueueTable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -22,19 +22,29 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ShowsTest {
+    static final String CONN_STR = "jdbc:derby:memory:shows;create=true";
+    static final String DB_USER = "app";
+    static final String DB_PWD = "app";
     private static final YearMonth JOSEUSER_CREDIT_CARD_EXPIRITY = YearMonth.of(
             LocalDateTime.now().getYear(),
             LocalDateTime.now().plusMonths(2).getMonth());
     private static final String JOSEUSER_CREDIT_CARD_SEC_CODE = "145";
     private static final String JOSEUSER_CREDIT_CARD_NUMBER = "123-456-789";
     private static final Long NON_EXISTENT_ID = -2L;
+    private static EntityManagerFactory emf;
     private final ForTests tests = new ForTests();
-    private EntityManagerFactory emf;
 
-    @BeforeEach
-    public void setUp() {
-        emf = Persistence.createEntityManagerFactory(PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS,
-                PersistenceUnit.connStrProperties("jdbc:derby:memory:shows;create=true", "app", "app"));
+    @BeforeAll
+    public static void setUp() {
+        emf = new EmfBuilder(DB_USER, DB_PWD)
+                .memory(CONN_STR)
+                .withDropAndCreateDDL()
+                .build();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        emf.getSchemaManager().truncate();
     }
 
     @Test
@@ -80,6 +90,29 @@ public class ShowsTest {
     }
 
     @Test
+    public void aShowIsPlayingAt() {
+        var shows = createShowsSubSystem(DateTimeProvider.create());
+        var movieId = tests.createAMovie(shows, 1L);
+        long theaterId = createATheater(shows);
+        shows.addNewShowFor(movieId,
+                LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
+                        13, 30),
+                10f, theaterId, 20);
+        shows.addNewShowFor(movieId,
+                LocalDateTime.of(LocalDate.now().plusYears(2).getYear(),
+                        5, 10,
+                        13, 30),
+                10f, theaterId, 20);
+        var movieShows = shows
+                .showsUntil(
+                        LocalDateTime.of(LocalDate.now().plusYears(1).getYear(),
+                                10, 10, 13, 31));
+        assertEquals(1, movieShows.size());
+        assertEquals(1, movieShows.getFirst().shows().size());
+        assertEquals(10f, movieShows.getFirst().shows().getFirst().price());
+    }
+
+    @Test
     public void showsPlayingAt() {
         var shows = createShowsSubSystem(DateTimeProvider.create());
         tests.createAMovie(shows, 1L);
@@ -95,16 +128,16 @@ public class ShowsTest {
         var movieShows = shows
                 .showsUntil(
                         LocalDateTime.of(LocalDate.now().getYear(),
-                                LocalDate.now().plusDays(5).getMonth(), LocalDate.now().plusDays(5).getDayOfMonth(), 13, 31));
+                                LocalDate.now().plusDays(5).getMonth(),
+                                LocalDate.now().plusDays(5).getDayOfMonth(), 13, 31));
         assertEquals(2, movieShows.size());
         MovieShows movieOne = movieShows.stream().filter(m -> m.movieId().equals(1L)).toList().getFirst();
         MovieShows movieTwo = movieShows.stream().filter(m -> m.movieId().equals(2L)).toList().getFirst();
         assertEquals(2, movieOne.shows().size());
         assertEquals(1, movieTwo.shows().size());
-        assertEquals(15f, movieOne.shows().stream().filter(s -> s.showId().equals(1L)).toList().getFirst().price());
-        assertEquals(16f, movieOne.shows().stream().filter(s -> s.showId().equals(2L)).toList().getFirst().price());
+        var prices = movieOne.shows().stream().map(s -> s.price()).toList();
+        assertTrue(prices.containsAll(List.of(15f, 16f)));
         assertEquals(30f, movieTwo.shows().getFirst().price());
-
     }
 
     @Test
@@ -134,29 +167,6 @@ public class ShowsTest {
         var movieShows = shows.movieShowsBy(movieId);
         assertEquals(1L, movieShows.movieId());
         assertEquals(0, movieShows.shows().size());
-    }
-
-    @Test
-    public void aShowIsPlayingAt() {
-        var shows = createShowsSubSystem(DateTimeProvider.create());
-        var movieId = tests.createAMovie(shows, 1L);
-        long theaterId = createATheater(shows);
-        shows.addNewShowFor(movieId,
-                LocalDateTime.of(LocalDate.now().plusYears(1).getYear(), 10, 10,
-                        13, 30),
-                10f, theaterId, 20);
-        shows.addNewShowFor(movieId,
-                LocalDateTime.of(LocalDate.now().plusYears(2).getYear(),
-                        5, 10,
-                        13, 30),
-                10f, theaterId, 20);
-        var movieShows = shows
-                .showsUntil(
-                        LocalDateTime.of(LocalDate.now().plusYears(1).getYear(),
-                                10, 10, 13, 31));
-        assertEquals(1, movieShows.size());
-        assertEquals(1, movieShows.getFirst().shows().size());
-        assertEquals(10f, movieShows.getFirst().shows().getFirst().price());
     }
 
     @Test
@@ -347,10 +357,5 @@ public class ShowsTest {
     private Long createATheater(ShowsSubSystem shows) {
         return shows.addNewTheater("a Theater",
                 Set.of(1, 2, 3, 4, 5, 6));
-    }
-
-    @AfterEach
-    public void tearDown() {
-        emf.close();
     }
 }

@@ -21,16 +21,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MoviesTest {
 
+    static final String CONN_STR = "jdbc:derby:memory:movies;create=true";
     private static final Long NON_EXISTENT_ID = -2L;
+    static final String DB_USER = "app";
+    static final String DB_PWD = "app";
     private static EntityManagerFactory emf;
     private final ForTests tests = new ForTests();
 
     @BeforeAll
     public static void setUp() {
-//        emf = Persistence.createEntityManagerFactory(DERBY_EMBEDDED_MOVIES_MS,
-//                PersistenceUnit.connStrProperties("jdbc:derby:memory:movies;create=true", "app", "app"));
-        emf = new EmfBuilder("app", "app")
-                .memory("jdbc:derby:memory:movies;create=true")
+        emf = new EmfBuilder(DB_USER, DB_PWD)
+                .memory(CONN_STR)
                 .withDropAndCreateDDL()
                 .build();
     }

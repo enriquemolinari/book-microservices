@@ -2,7 +2,6 @@ package model;
 
 import api.*;
 import common.DateTimeProvider;
-import common.Tx;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import model.events.publish.NewTicketsSoldEvent;
@@ -41,7 +40,7 @@ public class Shows implements ShowsSubSystem {
 
     @Override
     public List<MovieShows> showsUntil(LocalDateTime untilTo) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return movieShowsUntil(untilTo, em);
         });
     }
@@ -60,7 +59,7 @@ public class Shows implements ShowsSubSystem {
 
     @Override
     public Long addNewTheater(String name, Set<Integer> seatsNumbers) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var theater = new Theater(name, seatsNumbers);
             em.persist(theater);
             return theater.id();
@@ -70,7 +69,7 @@ public class Shows implements ShowsSubSystem {
     @Override
     public ShowInfo addNewShowFor(Long movieId, LocalDateTime startTime,
                                   float price, Long theaterId, int pointsToWin) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             //this method is not validating that shows are not overlapping
             var movie = movieBy(movieId, em);
             var theatre = theatreBy(theaterId, em);
@@ -84,7 +83,7 @@ public class Shows implements ShowsSubSystem {
     @Override
     public DetailedShowInfo reserve(Long buyerId, Long showTimeId,
                                     Set<Integer> selectedSeats) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             ShowTime showTime = showTimeBy(showTimeId, em);
             var user = buyerBy(buyerId, em);
             showTime.reserveSeatsFor(user, selectedSeats,
@@ -97,7 +96,7 @@ public class Shows implements ShowsSubSystem {
     public Ticket pay(Long userId, Long showTimeId, Set<Integer> selectedSeats,
                       String creditCardNumber, YearMonth expirationDate,
                       String secturityCode) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             ShowTime showTime = showTimeBy(showTimeId, em);
             var user = buyerBy(userId, em);
             var ticket = new Cashier(this.identifierGenerator, this.paymentGateway)
@@ -112,7 +111,7 @@ public class Shows implements ShowsSubSystem {
 
     @Override
     public SaleInfo sale(String salesIdentifier) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var list = em.createQuery("from Sale where salesIdentifier = :saleid", Sale.class)
                     .setParameter("saleid", salesIdentifier)
                     .getResultList();
@@ -126,34 +125,34 @@ public class Shows implements ShowsSubSystem {
 
     @Override
     public MovieShows movieShowsBy(Long movieId) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return this.movieBy(movieId, em).toMovieShow();
         });
     }
 
     public BuyerInfo buyer(Long userId) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return buyerInfoBy(userId).info();
         });
     }
 
     // used for testing only
     Long addNewMovie(Long id) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             em.persist(new Movie(id));
             return id;
         });
     }
 
     Long addNewBuyer(Long id) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             em.persist(new Buyer(id));
             return id;
         });
     }
 
     Buyer buyerInfoBy(Long buyerId) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return findByIdOrThrows(Buyer.class, buyerId, BUYER_ID_NOT_EXISTS, em);
         });
     }
@@ -184,14 +183,14 @@ public class Shows implements ShowsSubSystem {
 
     @Override
     public DetailedShowInfo show(Long id) {
-        return new Tx(emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             var show = showTimeBy(id, em);
             return show.toDetailedInfo();
         });
     }
 
     List<JQueueTable> allQueued() {
-        return new Tx(this.emf).inTx(em -> {
+        return emf.callInTransaction(em -> {
             return em.createQuery("from JQueueTable", JQueueTable.class).getResultList();
         });
     }

@@ -3,18 +3,14 @@ package main;
 import api.ShowsSubSystem;
 import jakarta.annotation.PreDestroy;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 import model.CreditCardPaymentProvider;
 import model.EntityCreator;
-import model.PersistenceUnit;
 import model.Shows;
 import model.queue.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-
-import static model.PersistenceUnit.DERBY_EMBEDDED_SHOWS_MS;
 
 @Configuration
 @Profile("default")
@@ -42,9 +38,10 @@ public class AppConfiguration {
 
     @Bean
     public ShowsSubSystem createShows() {
-        var emf = Persistence.
-                createEntityManagerFactory(DERBY_EMBEDDED_SHOWS_MS,
-                        PersistenceUnit.connStrProperties(dbUrl, dbUser, dbPassword));
+        var emf = new EmfBuilder(dbUser, dbPassword)
+                .memory(dbUrl)
+                .withDropAndCreateDDL()
+                .build();
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
 
         startUpPublisherWorkerFromJQueueToRabbit();

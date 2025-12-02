@@ -112,7 +112,7 @@ public class Users implements UsersSubSystem {
     }
 
     User userBy(Long userId, EntityManager em) {
-        return findByIdOrThrows(User.class, userId, Users.USER_ID_NOT_EXISTS, em);
+        return findByIdOrThrows(User.class, userId, USER_ID_NOT_EXISTS, em);
     }
 
     <T> T findByIdOrThrows(Class<T> entity, Long id, String msg, EntityManager em) {

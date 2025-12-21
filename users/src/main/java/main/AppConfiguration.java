@@ -21,6 +21,8 @@ public class AppConfiguration {
     private String EXCHANGE_NAME;
     @Value("${queue.rabbitmq.host}")
     private String RABBITHOST;
+    @Value("${queue.rabbitmq.port}")
+    private int RABBITPORT;
     @Value("${queue.rabbitmq.username}")
     private String RABBIUSER;
     @Value("${queue.rabbitmq.password}")
@@ -42,8 +44,8 @@ public class AppConfiguration {
         new SetUpSampleDb(emf).createSchemaAndPopulateSampleData();
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),
-                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
-        pushToBrokerFromJQueueWorker.startUp();
+                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBITPORT, RABBIUSER, RABBITPWD, EXCHANGE_NAME)));
+        pushToBrokerFromJQueueWorker.startUpSchedule();
         return new Users(emf, new PasetoToken(SECRET));
     }
 }

@@ -23,6 +23,7 @@ public class RabbitMQConsumer implements Consumer {
         factory.setAutomaticRecoveryEnabled(true);
         factory.setNetworkRecoveryInterval(10000);
         factory.setHost(this.rabbitConnStr.host());
+        factory.setPort(this.rabbitConnStr.port());
         factory.setUsername(this.rabbitConnStr.user());
         factory.setPassword(this.rabbitConnStr.password());
         try {

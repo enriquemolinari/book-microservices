@@ -22,7 +22,7 @@ public class PushToBrokerFromJQueueWorker {
         this.publisher = publisher;
     }
 
-    public void startUp() {
+    public void startUpSchedule() {
         try {
             this.publisher.startUp();
             scheduler = Executors.newScheduledThreadPool(1);

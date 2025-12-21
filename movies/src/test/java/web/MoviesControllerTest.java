@@ -3,6 +3,8 @@ package web;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import main.Main;
+import model.MovieDurationFormat;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -176,6 +178,27 @@ public class MoviesControllerTest {
 
         response.then().statusCode(401).body(ERROR_MESSAGE_KEY,
                 is(MoviesController.AUTHENTICATION_REQUIRED));
+    }
+
+    @Test
+    public void addNewMovieOk() throws JSONException {
+        JSONObject newMovieRequestBody = new JSONObject();
+        newMovieRequestBody.put(MOVIE_NAME_KEY, "New Test Movie");
+        newMovieRequestBody.put(MOVIE_DURATION_KEY, 120);
+        newMovieRequestBody.put(MOVIE_RELEASE_DATE_KEY, "2025-07-16");
+        newMovieRequestBody.put(MOVIE_PLOT_KEY, "A test movie plot");
+        newMovieRequestBody.put(MOVIE_GENRES_KEY, new JSONArray(new String[]{"ACTION", "DRAMA"}));
+
+        var url = moviesUrl(Routes.MOVIES_PRIVATE_NEW);
+        var response = given().contentType(JSON_CONTENT_TYPE)
+                .header(new Header(FW_GATEWAY_USER_ID, NICO_USER_ID))
+                .body(newMovieRequestBody.toString())
+                .post(url);
+
+        response.then().statusCode(200)
+                .body(MOVIE_NAME_KEY, is("New Test Movie"))
+                .body(MOVIE_DURATION_KEY, is(new MovieDurationFormat(120).toString()))
+                .body(MOVIE_PLOT_KEY, is("A test movie plot"));
     }
 
     private String moviesUrl(String route) {

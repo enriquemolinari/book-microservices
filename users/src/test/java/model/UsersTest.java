@@ -20,9 +20,9 @@ public class UsersTest {
     public static final String ENRIUSER_EMAIL = "enrique.molinari@gmail.com";
     public static final String ENRIUSER_NAME = "Enrique";
     public static final String ENRIUSER_SURNAME = "Molinari";
-    static final String CONN_STR = "jdbc:derby:memory:users;create=true";
-    static final String DB_USER = "app";
-    static final String DB_PWD = "app";
+    public static final String CONN_STR = "jdbc:derby:memory:users;create=true";
+    public static final String DB_USER = "app";
+    public static final String DB_PWD = "app";
     private static final String JOSEUSER_SURNAME = "aSurname";
     private static final String JOSEUSER_NAME = "Jose";
     private static final String JOSEUSER_PASS = "password12345679";

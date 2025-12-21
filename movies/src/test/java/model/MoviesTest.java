@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MoviesTest {
 
-    static final String CONN_STR = "jdbc:derby:memory:movies;create=true";
+    public static final String CONN_STR = "jdbc:derby:memory:movies;create=true";
+    public static final String DB_USER = "app";
+    public static final String DB_PWD = "app";
     private static final Long NON_EXISTENT_ID = -2L;
-    static final String DB_USER = "app";
-    static final String DB_PWD = "app";
     private static EntityManagerFactory emf;
     private final ForTests tests = new ForTests();
 

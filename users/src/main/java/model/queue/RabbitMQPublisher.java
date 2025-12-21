@@ -21,6 +21,7 @@ public class RabbitMQPublisher implements Publisher {
         try {
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(rabbitConnStr.host());
+            factory.setPort(rabbitConnStr.port());
             factory.setUsername(rabbitConnStr.user());
             factory.setPassword(rabbitConnStr.password());
             this.connection = factory.newConnection();

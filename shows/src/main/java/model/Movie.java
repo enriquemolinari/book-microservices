@@ -37,4 +37,8 @@ public class Movie {
     public Long id() {
         return this.id;
     }
+
+    public boolean withId(long expectedMovieId) {
+        return this.id == expectedMovieId;
+    }
 }

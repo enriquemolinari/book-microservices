@@ -23,9 +23,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ShowsTest {
-    static final String CONN_STR = "jdbc:derby:memory:shows;create=true";
-    static final String DB_USER = "app";
-    static final String DB_PWD = "app";
+    public static final String CONN_STR = "jdbc:derby:memory:shows;create=true";
+    public static final String DB_USER = "app";
+    public static final String DB_PWD = "app";
     private static final YearMonth JOSEUSER_CREDIT_CARD_EXPIRITY = YearMonth.of(
             LocalDateTime.now().getYear(),
             LocalDateTime.now().plusMonths(2).getMonth());

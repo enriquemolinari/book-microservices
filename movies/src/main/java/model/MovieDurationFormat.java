@@ -2,7 +2,7 @@ package model;
 
 import java.time.Duration;
 
-class MovieDurationFormat {
+public class MovieDurationFormat {
 
     private final int duration;
 

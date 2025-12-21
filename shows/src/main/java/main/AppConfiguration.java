@@ -23,6 +23,8 @@ public class AppConfiguration {
     private String QUEUE_NAME_NEWMOVIE;
     @Value("${queue.rabbitmq.host}")
     private String RABBITHOST;
+    @Value("${queue.rabbitmq.port}")
+    private int RABBITPORT;
     @Value("${queue.rabbitmq.username}")
     private String RABBIUSER;
     @Value("${queue.rabbitmq.password}")
@@ -53,7 +55,7 @@ public class AppConfiguration {
 
     private void startUpConsumerWorker(EntityManagerFactory emf) {
         var rabbitMQConsumer = new RabbitMQConsumer(
-                new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD),
+                new RabbitConnStr(RABBITHOST, RABBITPORT, RABBIUSER, RABBITPWD),
                 new EntityCreator(emf),
                 QUEUE_NAME_NEWUSER, QUEUE_NAME_NEWMOVIE);
         rabbitMQConsumer.listenForNewUsers();
@@ -63,7 +65,7 @@ public class AppConfiguration {
     private void startUpPublisherWorkerFromJQueueToRabbit() {
         pushToBrokerFromJQueueWorker = new PushToBrokerFromJQueueWorker(
                 new DbConnStr(dbUrl, dbUser, dbPassword),
-                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBIUSER, RABBITPWD), EXCHANGE_NAME));
+                new RabbitMQPublisher(new RabbitConnStr(RABBITHOST, RABBITPORT, RABBIUSER, RABBITPWD), EXCHANGE_NAME));
         pushToBrokerFromJQueueWorker.startUpSchedule();
     }
 

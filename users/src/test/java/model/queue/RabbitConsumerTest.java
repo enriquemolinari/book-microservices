@@ -3,41 +3,19 @@ package model.queue;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import model.Buyer;
-import model.EntityCreator;
-import model.Movie;
-import model.events.consume.NewMovieEvent;
-import model.events.consume.NewUserEvent;
 
-public class RabbitMQConsumer implements Consumer {
+public class RabbitConsumerTest {
     public static final String ENCODING = "UTF-8";
     private final RabbitConnStr rabbitConnStr;
-    private final EntityCreator creator;
-    private final String queueNameForNewUsers;
-    private final String queueNameForNewMovie;
+    private final String queueName;
+    private String payloadReceived;
 
-    public RabbitMQConsumer(RabbitConnStr rabbitConnStr, EntityCreator creator, String queueNameForNewUser, String queueNameForNewMovie) {
+    public RabbitConsumerTest(RabbitConnStr rabbitConnStr, String queueName) {
         this.rabbitConnStr = rabbitConnStr;
-        this.creator = creator;
-        this.queueNameForNewUsers = queueNameForNewUser;
-        this.queueNameForNewMovie = queueNameForNewMovie;
+        this.queueName = queueName;
     }
 
     public void listenForNewUsers() {
-        executeOnEachMessage((payload) -> {
-            var newUserEvent = NewUserEvent.of(payload);
-            this.creator.persist(new Buyer(newUserEvent.userId()), newUserEvent.userId());
-        }, this.queueNameForNewUsers);
-    }
-
-    public void listenForNewMovies() {
-        executeOnEachMessage((payload) -> {
-            var newMovieEvent = NewMovieEvent.of(payload);
-            this.creator.persist(new Movie(newMovieEvent.id()), newMovieEvent.id());
-        }, this.queueNameForNewMovie);
-    }
-
-    private void executeOnEachMessage(java.util.function.Consumer<String> executeThis, String queueName) {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setAutomaticRecoveryEnabled(true);
         factory.setNetworkRecoveryInterval(10000);
@@ -49,11 +27,10 @@ public class RabbitMQConsumer implements Consumer {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
             // here is waiting for new messages
-            channel.basicConsume(queueName, false, (consumerTag, delivery) -> {
+            channel.basicConsume(this.queueName, false, (consumerTag, delivery) -> {
                 try {
-                    String eventPayload = new String(delivery.getBody(), ENCODING);
                     // do process
-                    executeThis.accept(eventPayload);
+                    this.payloadReceived = new String(delivery.getBody(), ENCODING);
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(),
                             false /* not muliple, confirm this eventPayload only */);
                 } catch (Exception e) {
@@ -66,5 +43,9 @@ public class RabbitMQConsumer implements Consumer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String payloadReceived() {
+        return payloadReceived;
     }
 }

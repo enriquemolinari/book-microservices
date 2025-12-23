@@ -49,6 +49,10 @@ public class Config {
         return properties.getProperty("queue.rabbitmq.host");
     }
 
+    public int rabbitMQPort() {
+        return Integer.valueOf(properties.getProperty("queue.rabbitmq.port"));
+    }
+
     public String rabbitMQUsername() {
         return properties.getProperty("queue.rabbitmq.username");
     }

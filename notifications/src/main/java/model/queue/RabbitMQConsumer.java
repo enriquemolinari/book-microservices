@@ -24,6 +24,7 @@ public class RabbitMQConsumer implements Consumer {
         factory.setAutomaticRecoveryEnabled(true);
         factory.setNetworkRecoveryInterval(10000);
         factory.setHost(this.rabbitConnStr.host());
+        factory.setPort(this.rabbitConnStr.port());
         factory.setUsername(this.rabbitConnStr.user());
         factory.setPassword(this.rabbitConnStr.password());
         try {
@@ -33,7 +34,7 @@ public class RabbitMQConsumer implements Consumer {
             channel.basicConsume(this.rabbitConnStr.queueName(), false, (consumerTag, delivery) -> {
                 try {
                     String eventPayload = new String(delivery.getBody(), ENCODING);
-                    // d|o process
+                    // process
                     var ticketSoldEvent = NewTicketSoldEvent.of(eventPayload);
                     this.processor.process(ticketSoldEvent.saleId());
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(),

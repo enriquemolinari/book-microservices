@@ -16,6 +16,7 @@ public class NewTicketSoldProcessorTest {
     public static final String SALES_ID = "7f1ffef0-f0d4-4099-a368-d5e76c652a8b";
     private Config config;
     private ClientAndServer mockServer;
+    private ForTests forTests = new ForTests();
 
     @BeforeEach
     public void startMockServer() {
@@ -35,9 +36,9 @@ public class NewTicketSoldProcessorTest {
                         withPath(config
                                 .salesRequestPath()
                                 .formatted(SALES_ID)))
-                .respond(response().withBody(jsonShowSale()));
+                .respond(response().withBody(forTests.jsonShowSale()));
 
-        var saleInfoRequestor = new SaleInfoRequestor(getUrl());
+        var saleInfoRequestor = new SaleInfoRequestor(forTests.getUrl(this.config.gatewayHost(), PORT_TEST, this.config.salesRequestPath()));
         String[] values = new String[3];
         var showSoldProcessor = new NewTicketSoldProcessor(
                 (emailTo, subject, body) -> {
@@ -49,43 +50,8 @@ public class NewTicketSoldProcessorTest {
         showSoldProcessor.process(SALES_ID);
         assertEquals("enrique.molinari@gmail.com", values[0]);
         assertEquals("You have new tickets!", values[1]);
-        assertEquals(expectedBody(), values[2]);
-    }
-
-    private String getUrl() {
-        return "http://" + config.gatewayHost() + ":" + PORT_TEST + config.salesRequestPath();
-    }
-
-    private String expectedBody() {
-        return """
-                Hello emolinari!
-                You have new tickets!
-                Here are the details of your booking:
-                Movie: The Movie of the Century
-                Seats: 3
-                Show time: Tuesday 04/08 20:56
-                Total paid: 10.0""";
-    }
-
-    private String jsonShowSale() {
-        return
-                """                        
-                        {
-                                         "salesIdentifier": "7f1ffef0-f0d4-4099-a368-d5e76c652a8b",
-                                         "movieId": 2,
-                                         "movieName": "The Movie of the Century",
-                                         "userId": 2,
-                                         "username": "emolinari",
-                                         "fullname": "Enrique Molinari",
-                                         "email": "enrique.molinari@gmail.com",
-                                         "total": 10.0,
-                                         "pointsWon": 10,
-                                         "seats": [
-                                            3
-                                         ],
-                                         "showStartTime": "Tuesday 04/08 20:56"
-                                         }
-                        """;
+        assertEquals(forTests.expectedShowSoldBody(), values[2]);
     }
 }
+
 

@@ -19,6 +19,7 @@ public class Main {
 
     public void startUp() {
         var rabbitConn = new RabbitConnStr(config.rabbitMQHost()
+                , config.rabbitMQPort()
                 , config.rabbitMQUsername()
                 , config.rabbitMQPassword()
                 , config.queueName());

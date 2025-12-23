@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class NewSaleEmailTemplate {
+public class NewSaleEmailTemplate {
 
-    static final String EMAIL_SUBJECT_SALE = "You have new tickets!";
+    public static final String EMAIL_SUBJECT_SALE = "You have new tickets!";
     private final float totalAmount;
     private final String userName;
     private final List<Integer> seatsBought;
